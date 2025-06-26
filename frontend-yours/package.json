@@ -1,0 +1,27 @@
+{
+  "name": "where-you-belong-yours",
+  "version": "1.0.0",
+  "description": "Where You Belong - Your Website",
+  "main": "index.js",
+  "scripts": {
+    "build-css": "tailwindcss -i ./src/css/input.css -o ./dist/css/output.css --watch",
+    "build": "tailwindcss -i ./src/css/input.css -o ./dist/css/output.css --minify",
+    "dev": "concurrently \"npm run build-css\" \"live-server --port=3001 --host=localhost\"",
+    "start": "live-server --port=3001 --host=localhost"
+  },
+  "keywords": [
+    "love",
+    "music",
+    "website"
+  ],
+  "author": "Your Name",
+  "license": "ISC",
+  "devDependencies": {
+    "tailwindcss": "^3.3.0",
+    "live-server": "^1.2.2",
+    "concurrently": "^8.2.0"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.7.2"
+  }
+}

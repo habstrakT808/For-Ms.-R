@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap");
+
+/* Custom Base Styles */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-gradient-to-br from-cream-50 via-warm-50 to-sage-50 min-h-screen;
+    font-family: "Inter", system-ui, sans-serif;
+  }
+}
+
+/* Custom Components */
+@layer components {
+  .hero-gradient {
+    background: linear-gradient(
+      135deg,
+      rgba(212, 165, 116, 0.1) 0%,
+      rgba(244, 168, 85, 0.05) 50%,
+      rgba(127, 145, 127, 0.1) 100%
+    );
+  }
+
+  .glass-effect {
+    @apply backdrop-blur-sm bg-white/20 border border-white/30;
+  }
+
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Navigation Active State */
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(
+      to right,
+      theme("colors.warm.400"),
+      theme("colors.cream.500")
+    );
+    transition: width 0.3s ease;
+  }
+
+  .nav-link:hover::after,
+  .nav-link.active::after {
+    width: 100%;
+  }
+
+  /* Responsive Typography */
+  .hero-title {
+    @apply text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl;
+  }
+
+  .hero-subtitle {
+    @apply text-lg sm:text-xl md:text-2xl lg:text-3xl;
+  }
+
+  /* Container Responsive */
+  .section-container {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Button Responsive */
+  .btn-primary {
+    @apply px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base;
+  }
+}
+
+/* Custom Utilities */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Mobile-first breakpoints */
+@media (max-width: 640px) {
+  .hero-gradient {
+    background-attachment: scroll;
+  }
+
+  .glass-effect {
+    @apply bg-white/90;
+  }
+}
+
+/* Add these new animations to the existing file */
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Additional animations for enhanced interactivity */
+  .animate-sparkle {
+    animation: sparkle 2s ease-out forwards;
+  }
+
+  .animate-bottle-float {
+    animation: bottleFloat 3s ease-out forwards;
+  }
+}
+
+/* Enhanced responsive design */
+@media (max-width: 640px) {
+  .hero-gradient {
+    background-attachment: scroll;
+  }
+
+  .glass-effect {
+    @apply bg-white/90;
+  }
+
+  /* Mobile-specific improvements */
+  .section-container {
+    @apply px-4;
+  }
+
+  .btn-primary {
+    @apply text-sm px-4 py-2;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    @apply text-3xl;
+  }
+
+  .hero-subtitle {
+    @apply text-lg;
+  }
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition-property: transform, opacity, background-color, border-color, color;
+  transition-duration: 200ms;
+  transition-timing-function: ease-in-out;
+}
+
+/* Focus states for accessibility */
+button:focus,
+input:focus,
+textarea:focus {
+  outline: 2px solid theme("colors.warm.400");
+  outline-offset: 2px;
+}
