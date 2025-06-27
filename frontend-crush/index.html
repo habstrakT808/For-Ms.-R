@@ -8,6 +8,9 @@
     <!-- Tailwind CSS -->
     <link href="./dist/css/output.css" rel="stylesheet" />
 
+    <!-- Socket.io Client -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
     <!-- Favicon -->
     <link
       rel="icon"
@@ -19,6 +22,11 @@
     <meta name="theme-color" content="#d4a574" />
   </head>
   <body class="overflow-x-hidden">
+    <!-- User ID Detection (Hidden) -->
+    <div id="user-id" data-user="crush" class="hidden"></div>
+
+    <!-- Connection Status - Removed -->
+
     <!-- Background Elements -->
     <div class="fixed inset-0 -z-10">
       <!-- Floating particles -->
@@ -43,7 +51,7 @@
       ></div>
     </div>
 
-    <!-- Enhanced Navigation -->
+    <!-- Enhanced Navigation with Dark Mode -->
     <nav
       class="fixed top-0 left-0 right-0 z-50 glass-effect transition-all duration-300"
     >
@@ -52,61 +60,75 @@
           <!-- Logo -->
           <div class="flex items-center space-x-2">
             <span class="text-2xl">🎵</span>
-            <span class="font-display text-xl font-semibold text-cream-800"
+            <span
+              class="font-display text-xl font-semibold text-cream-800 dark:text-cream-200"
               >Where You Belong</span
             >
           </div>
 
           <!-- Desktop Navigation -->
-          <div class="hidden md:flex space-x-8 text-sm font-medium">
-            <a
-              href="#home"
-              class="nav-link text-cream-700 hover:text-warm-600 transition-colors relative"
+          <div class="hidden md:flex items-center space-x-8">
+            <div class="flex space-x-8 text-sm font-medium">
+              <a
+                href="#home"
+                class="nav-link text-cream-700 dark:text-cream-300 hover:text-warm-600 dark:hover:text-warm-400 transition-colors relative"
+                >Home</a
+              >
+              <a
+                href="#music"
+                class="nav-link text-cream-700 dark:text-cream-300 hover:text-warm-600 dark:hover:text-warm-400 transition-colors relative"
+                >Music Corner</a
+              >
+              <a
+                href="#letters"
+                class="nav-link text-cream-700 dark:text-cream-300 hover:text-warm-600 dark:hover:text-warm-400 transition-colors relative"
+                >Letters</a
+              >
+              <a
+                href="#messages"
+                class="nav-link text-cream-700 dark:text-cream-300 hover:text-warm-600 dark:hover:text-warm-400 transition-colors relative"
+                >Messages</a
+              >
+            </div>
+
+            <!-- Dark Mode Toggle -->
+            <button
+              id="theme-toggle"
+              class="w-10 h-10 bg-cream-100 dark:bg-cream-800 hover:bg-cream-200 dark:hover:bg-cream-700 rounded-full flex items-center justify-center text-cream-600 dark:text-cream-300 transition-all duration-200 hover:scale-105"
+              title="Toggle theme"
             >
-              Home
-            </a>
-            <a
-              href="#music"
-              class="nav-link text-cream-700 hover:text-warm-600 transition-colors relative"
-            >
-              Music Corner
-            </a>
-            <a
-              href="#letters"
-              class="nav-link text-cream-700 hover:text-warm-600 transition-colors relative"
-            >
-              Letters
-            </a>
-            <a
-              href="#sanctuary"
-              class="nav-link text-cream-700 hover:text-warm-600 transition-colors relative"
-            >
-              Sanctuary
-            </a>
-            <a
-              href="#bottles"
-              class="nav-link text-cream-700 hover:text-warm-600 transition-colors relative"
-            >
-              Messages
-            </a>
+              <span id="theme-icon" class="text-lg">🌙</span>
+            </button>
           </div>
 
           <!-- Mobile Menu Button -->
-          <button class="md:hidden p-2 text-cream-700" id="mobile-menu-btn">
-            <svg
-              class="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <div class="md:hidden flex items-center space-x-2">
+            <button
+              id="theme-toggle-mobile"
+              class="w-8 h-8 bg-cream-100 dark:bg-cream-800 hover:bg-cream-200 dark:hover:bg-cream-700 rounded-full flex items-center justify-center text-cream-600 dark:text-cream-300 transition-all duration-200"
+              title="Toggle theme"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 6h16M4 12h16M4 18h16"
-              ></path>
-            </svg>
-          </button>
+              <span id="theme-icon-mobile" class="text-sm">🌙</span>
+            </button>
+            <button
+              class="p-2 text-cream-700 dark:text-cream-300"
+              id="mobile-menu-btn"
+            >
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                ></path>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- Mobile Menu -->
@@ -114,27 +136,22 @@
           <div class="flex flex-col space-y-3">
             <a
               href="#home"
-              class="text-cream-700 hover:text-warm-600 transition-colors py-2"
+              class="text-cream-700 dark:text-cream-300 hover:text-warm-600 dark:hover:text-warm-400 transition-colors py-2"
               >Home</a
             >
             <a
               href="#music"
-              class="text-cream-700 hover:text-warm-600 transition-colors py-2"
+              class="text-cream-700 dark:text-cream-300 hover:text-warm-600 dark:hover:text-warm-400 transition-colors py-2"
               >Music Corner</a
             >
             <a
               href="#letters"
-              class="text-cream-700 hover:text-warm-600 transition-colors py-2"
+              class="text-cream-700 dark:text-cream-300 hover:text-warm-600 dark:hover:text-warm-400 transition-colors py-2"
               >Letters</a
             >
             <a
-              href="#sanctuary"
-              class="text-cream-700 hover:text-warm-600 transition-colors py-2"
-              >Sanctuary</a
-            >
-            <a
-              href="#bottles"
-              class="text-cream-700 hover:text-warm-600 transition-colors py-2"
+              href="#messages"
+              class="text-cream-700 dark:text-cream-300 hover:text-warm-600 dark:hover:text-warm-400 transition-colors py-2"
               >Messages</a
             >
           </div>
@@ -144,12 +161,11 @@
 
     <!-- Main Content -->
     <main>
-      <!-- Hero Section -->
+      <!-- Hero Section (FIXED) -->
       <section
         id="home"
         class="min-h-screen flex items-center justify-center relative overflow-hidden"
       >
-        <!-- Enhanced Background -->
         <div class="absolute inset-0 hero-gradient"></div>
 
         <!-- Floating Music Notes -->
@@ -179,12 +195,13 @@
           </div>
         </div>
 
-        <div class="container mx-auto px-6 text-center relative z-10">
+        <div
+          class="container mx-auto px-6 text-center relative z-10 hero-content"
+        >
           <div class="animate-fade-in">
-            <!-- Main Title with enhanced styling -->
             <div class="mb-8">
               <h1
-                class="font-display hero-title font-bold text-cream-900 mb-4 text-shadow leading-tight"
+                class="font-display hero-title font-bold text-cream-900 dark:text-cream-200 mb-4 text-shadow leading-tight"
               >
                 Where You
                 <span
@@ -198,15 +215,13 @@
               ></div>
             </div>
 
-            <!-- Subtitle with better typography -->
             <p
-              class="hero-subtitle text-cream-700 mb-12 max-w-3xl mx-auto text-balance font-light leading-relaxed"
+              class="hero-subtitle text-cream-700 dark:text-cream-300 mb-12 max-w-3xl mx-auto text-balance font-light leading-relaxed"
             >
               A quiet corner of the internet, where music speaks the words we
               never said
             </p>
 
-            <!-- Call to action buttons -->
             <div
               class="animate-slide-up space-y-6"
               style="animation-delay: 0.5s"
@@ -227,57 +242,62 @@
                 </button>
                 <button
                   onclick="scrollToSection('letters')"
-                  class="btn-primary border-2 border-cream-400 text-cream-800 rounded-full font-medium hover:bg-cream-400 hover:text-white transition-all duration-300"
+                  class="btn-primary border-2 border-cream-400 text-cream-800 dark:text-cream-300 dark:border-cream-600 rounded-full font-medium hover:bg-cream-400 hover:text-white transition-all duration-300"
                 >
                   Read Letters 💌
                 </button>
               </div>
 
-              <!-- Signature -->
-              <div class="mt-8">
+              <!-- Desktop footer -->
+              <div class="mt-8 hidden sm:block">
                 <div
-                  class="inline-flex items-center space-x-2 text-cream-600 font-medium"
+                  class="inline-flex items-center space-x-2 text-cream-600 dark:text-cream-400 font-medium"
                 >
                   <span>Crafted with</span>
                   <span class="text-warm-500 animate-pulse text-xl">♥</span>
                   <span>and countless hours of</span>
-                  <span class="text-sage-600">hope</span>
+                  <span class="text-sage-600 dark:text-sage-400">hope</span>
                 </div>
-                <div class="mt-3 text-sm text-cream-500 font-serif italic">
+                <div
+                  class="mt-3 text-sm text-cream-500 dark:text-cream-500 font-serif italic"
+                >
                   — For someone who deserves all the beautiful songs in the
                   world ✨
                 </div>
               </div>
-            </div>
-          </div>
 
-          <!-- Enhanced Scroll Indicator -->
-          <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-            <div class="flex flex-col items-center space-y-2 animate-bounce">
-              <span class="text-xs text-cream-500 font-medium"
-                >Scroll to explore</span
-              >
-              <div
-                class="w-6 h-10 border-2 border-cream-400 rounded-full flex justify-center"
-              >
-                <div
-                  class="w-1 h-3 bg-cream-400 rounded-full mt-2 animate-pulse"
-                ></div>
+              <!-- Mobile optimized layout -->
+              <div class="mt-8 sm:hidden">
+                <div class="flex flex-col items-center text-center gap-2">
+                  <div
+                    class="text-cream-600 dark:text-cream-400 font-medium flex items-center"
+                  >
+                    <span>Crafted with</span>
+                    <span class="text-warm-500 animate-pulse text-xl mx-1"
+                      >♥</span
+                    >
+                  </div>
+                  <div class="text-cream-600 dark:text-cream-400 font-medium">
+                    <span>and countless hours of</span>
+                    <span class="text-sage-600 dark:text-sage-400 ml-1"
+                      >hope</span
+                    >
+                  </div>
+                  <div
+                    class="mt-3 text-sm text-cream-500 dark:text-cream-500 font-serif italic px-2"
+                  >
+                    — For someone who deserves all<br />the beautiful songs in
+                    the world ✨
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Music Corner Section - ENHANCED -->
+      <!-- Music Corner Section - REAL-TIME -->
       <section id="music" class="py-20 bg-white/50 relative">
-        <!-- Background decoration -->
-        <div class="absolute inset-0 opacity-5">
-          <div class="absolute top-10 left-10 text-6xl text-warm-500">♪</div>
-          <div class="absolute top-20 right-20 text-4xl text-cream-500">♫</div>
-          <div class="absolute bottom-20 left-20 text-5xl text-sage-500">♬</div>
-        </div>
-
         <div class="section-container relative">
           <div class="text-center mb-16">
             <h2
@@ -286,12 +306,12 @@
               Music Corner 🎵
             </h2>
             <p class="text-lg text-cream-700 max-w-2xl mx-auto leading-relaxed">
-              Because music is the language we both understand. Here are
-              melodies that speak to your soul.
+              Share the perfect song for each other. Today's comfort song is
+              chosen with love.
             </p>
           </div>
 
-          <!-- Today's Comfort Song -->
+          <!-- Today's Comfort Song - REAL-TIME -->
           <div class="max-w-4xl mx-auto mb-12">
             <div
               class="glass-effect rounded-2xl p-8 hover:shadow-xl transition-all duration-300"
@@ -305,8 +325,8 @@
                   >
                     Today's Comfort Song
                   </h3>
-                  <p class="text-cream-600">
-                    Your favorite song of all time ✨
+                  <p class="text-cream-600" id="song-selected-by">
+                    Chosen with love ✨
                   </p>
                 </div>
                 <div
@@ -316,492 +336,307 @@
                 </div>
               </div>
 
-              <!-- Music Player -->
+              <!-- Enhanced Music Player - REAL-TIME -->
               <div
                 class="bg-gradient-to-br from-cream-50 to-warm-50 rounded-xl p-6 border border-cream-200"
+                id="music-player"
               >
-                <!-- Song Info -->
-                <div class="text-center mb-6">
+                <!-- Loading State -->
+                <div id="song-loading" class="text-center py-8">
                   <div
-                    class="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-warm-300 to-cream-400 rounded-lg flex items-center justify-center shadow-md"
+                    class="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-warm-300 to-cream-400 rounded-lg flex items-center justify-center shadow-md animate-pulse"
                   >
-                    <span class="text-4xl text-white">🎤</span>
+                    <span class="text-4xl text-white">🎵</span>
                   </div>
-                  <h4
-                    class="font-display text-xl font-semibold text-cream-900 mb-1"
-                  >
-                    You Belong With Me
-                  </h4>
-                  <p class="text-cream-600 mb-2">Taylor Swift</p>
-                  <p class="text-sm text-cream-500 italic">
-                    "Your favorite song of all time"
-                  </p>
+                  <p class="text-cream-600">Loading today's song...</p>
                 </div>
 
-                <!-- Player Controls -->
-                <div class="space-y-4">
-                  <!-- Progress Bar -->
-                  <div class="flex items-center space-x-3">
-                    <span class="text-xs text-cream-600 font-mono">2:34</span>
+                <!-- Enhanced Song Display -->
+                <div id="song-display" class="hidden">
+                  <div
+                    class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6 mb-6"
+                  >
+                    <!-- Album Art -->
                     <div
-                      class="flex-1 h-2 bg-cream-200 rounded-full cursor-pointer"
-                      id="progress-bar"
+                      class="w-40 h-40 bg-gradient-to-br from-warm-300 to-cream-400 rounded-xl flex items-center justify-center shadow-lg overflow-hidden flex-shrink-0"
                     >
+                      <img
+                        id="song-album-art"
+                        src=""
+                        alt="Album Art"
+                        class="w-full h-full object-cover hidden"
+                      />
+                      <span id="song-placeholder" class="text-5xl text-white"
+                        >🎤</span
+                      >
+                    </div>
+
+                    <!-- Song Info -->
+                    <div class="flex-1 text-center md:text-left">
+                      <h4
+                        class="font-display text-2xl font-bold text-cream-900 mb-2"
+                        id="song-title"
+                      >
+                        Song Title
+                      </h4>
+                      <p class="text-cream-700 text-lg mb-2" id="song-artist">
+                        Artist
+                      </p>
+                      <p class="text-cream-600 text-sm mb-3" id="song-album">
+                        Album
+                      </p>
+                      <p
+                        class="text-xs text-cream-500 italic"
+                        id="song-message"
+                      >
+                        A special song chosen for you
+                      </p>
+
+                      <!-- Song Stats -->
                       <div
-                        class="h-2 bg-gradient-to-r from-warm-400 to-cream-500 rounded-full w-1/3 transition-all duration-300"
-                        id="progress"
-                      ></div>
-                    </div>
-                    <span class="text-xs text-cream-600 font-mono">3:42</span>
-                  </div>
-
-                  <!-- Control Buttons -->
-                  <div class="flex items-center justify-center space-x-6">
-                    <button
-                      class="w-10 h-10 bg-cream-200 hover:bg-cream-300 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105"
-                    >
-                      <span class="text-cream-700">⏮</span>
-                    </button>
-                    <button
-                      id="play-btn"
-                      class="w-14 h-14 bg-gradient-to-r from-warm-400 to-cream-500 hover:from-warm-500 hover:to-cream-600 rounded-full flex items-center justify-center text-white shadow-lg transition-all duration-200 hover:scale-105"
-                    >
-                      <span id="play-icon">▶</span>
-                    </button>
-                    <button
-                      class="w-10 h-10 bg-cream-200 hover:bg-cream-300 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105"
-                    >
-                      <span class="text-cream-700">⏭</span>
-                    </button>
-                  </div>
-
-                  <!-- Volume Control -->
-                  <div class="flex items-center justify-center space-x-3">
-                    <span class="text-cream-600">🔊</span>
-                    <div class="w-24 h-1 bg-cream-200 rounded-full">
-                      <div class="w-3/4 h-1 bg-cream-400 rounded-full"></div>
+                        class="flex items-center justify-center md:justify-start space-x-4 mt-3 text-xs text-cream-500"
+                      >
+                        <span id="song-duration">0:00</span>
+                        <span>•</span>
+                        <span id="song-popularity">Popular</span>
+                        <span>•</span>
+                        <span id="song-selected-time">Just now</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          <!-- Curated Playlists -->
-          <div class="grid md:grid-cols-2 gap-8 mb-12">
-            <!-- LANY Playlist -->
-            <div
-              class="glass-effect rounded-xl p-6 hover:shadow-lg transition-all duration-300 group"
-            >
-              <div class="flex items-center space-x-4 mb-4">
-                <div
-                  class="w-12 h-12 bg-gradient-to-br from-sage-400 to-sage-600 rounded-lg flex items-center justify-center"
-                >
-                  <span class="text-white font-bold">L</span>
-                </div>
-                <div>
-                  <h4 class="font-semibold text-cream-900">LANY Vibes</h4>
-                  <p class="text-sm text-cream-600">Dreamy & Nostalgic</p>
-                </div>
-              </div>
-              <div class="space-y-2 text-sm">
-                <div
-                  class="flex justify-between text-cream-700 hover:text-warm-600 cursor-pointer transition-colors"
-                >
-                  <span>ILYSB</span>
-                  <span class="text-cream-500">3:24</span>
-                </div>
-                <div
-                  class="flex justify-between text-cream-700 hover:text-warm-600 cursor-pointer transition-colors"
-                >
-                  <span>Malibu Nights</span>
-                  <span class="text-cream-500">3:42</span>
-                </div>
-                <div
-                  class="flex justify-between text-cream-700 hover:text-warm-600 cursor-pointer transition-colors"
-                >
-                  <span>13</span>
-                  <span class="text-cream-500">3:18</span>
-                </div>
-              </div>
-            </div>
+                  <!-- Enhanced Player Controls -->
+                  <div class="space-y-4">
+                    <!-- Progress Bar -->
+                    <div class="w-full">
+                      <div
+                        class="flex items-center justify-between text-xs text-cream-500 mb-2"
+                      >
+                        <span id="current-time">0:00</span>
+                        <span id="total-time">0:00</span>
+                      </div>
+                      <div
+                        class="w-full bg-cream-200 rounded-full h-2 cursor-pointer"
+                        id="progress-container"
+                      >
+                        <div
+                          class="bg-gradient-to-r from-warm-400 to-cream-500 h-2 rounded-full transition-all duration-300"
+                          id="progress-bar"
+                          style="width: 0%"
+                        ></div>
+                      </div>
+                    </div>
 
-            <!-- Keshi & NIKI Playlist -->
-            <div
-              class="glass-effect rounded-xl p-6 hover:shadow-lg transition-all duration-300 group"
-            >
-              <div class="flex items-center space-x-4 mb-4">
-                <div
-                  class="w-12 h-12 bg-gradient-to-br from-warm-400 to-warm-600 rounded-lg flex items-center justify-center"
-                >
-                  <span class="text-white font-bold">K</span>
-                </div>
-                <div>
-                  <h4 class="font-semibold text-cream-900">Keshi & NIKI</h4>
-                  <p class="text-sm text-cream-600">Soft & Soulful</p>
-                </div>
-              </div>
-              <div class="space-y-2 text-sm">
-                <div
-                  class="flex justify-between text-cream-700 hover:text-warm-600 cursor-pointer transition-colors"
-                >
-                  <span>right here - keshi</span>
-                  <span class="text-cream-500">2:58</span>
-                </div>
-                <div
-                  class="flex justify-between text-cream-700 hover:text-warm-600 cursor-pointer transition-colors"
-                >
-                  <span>Every Summertime - NIKI</span>
-                  <span class="text-cream-500">3:15</span>
-                </div>
-                <div
-                  class="flex justify-between text-cream-700 hover:text-warm-600 cursor-pointer transition-colors"
-                >
-                  <span>skeletons - keshi</span>
-                  <span class="text-cream-500">3:33</span>
-                </div>
-              </div>
-            </div>
-          </div>
+                    <!-- Control Buttons -->
+                    <div
+                      class="flex items-center justify-center space-x-4 mobile-controls"
+                    >
+                      <!-- Previous (Future feature) -->
+                      <button
+                        class="w-10 h-10 bg-cream-200 hover:bg-cream-300 rounded-full flex items-center justify-center text-cream-600 transition-all duration-200 opacity-50 cursor-not-allowed"
+                        disabled
+                        title="Previous track (coming soon)"
+                      >
+                        <span class="text-sm">⏮</span>
+                      </button>
 
-          <!-- Songs That Speak (Reference to playlist communication) -->
-          <div class="max-w-3xl mx-auto">
-            <div class="text-center mb-8">
-              <h3
-                class="font-display text-2xl font-semibold text-cream-900 mb-2"
-              >
-                Songs That Speak
-              </h3>
-              <p class="text-cream-600 italic">
-                When words weren't enough, we had music...
-              </p>
-            </div>
+                      <!-- Play/Pause -->
+                      <button
+                        id="play-pause-btn"
+                        onclick="togglePlayback()"
+                        class="w-14 h-14 bg-gradient-to-r from-warm-400 to-cream-500 hover:from-warm-500 hover:to-cream-600 rounded-full flex items-center justify-center text-white shadow-lg transition-all duration-200 hover:scale-105"
+                      >
+                        <span id="play-pause-icon" class="text-lg">▶</span>
+                      </button>
 
-            <div class="glass-effect rounded-xl p-6">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="text-center p-4 bg-cream-50 rounded-lg">
-                  <div class="text-2xl mb-2">🎵</div>
-                  <h4 class="font-medium text-cream-900 mb-1">
-                    A Letter I've Never Sent
-                  </h4>
-                  <p class="text-sm text-cream-600">
-                    Your playlist that spoke volumes
-                  </p>
+                      <!-- Next (Future feature) -->
+                      <button
+                        class="w-10 h-10 bg-cream-200 hover:bg-cream-300 rounded-full flex items-center justify-center text-cream-600 transition-all duration-200 opacity-50 cursor-not-allowed"
+                        disabled
+                        title="Next track (coming soon)"
+                      >
+                        <span class="text-sm">⏭</span>
+                      </button>
+
+                      <!-- Volume Control -->
+                      <div class="flex items-center space-x-2">
+                        <span class="text-cream-500 text-sm">🔊</span>
+                        <input
+                          type="range"
+                          id="volume-slider"
+                          min="0"
+                          max="100"
+                          value="70"
+                          class="w-20 h-2 bg-cream-200 rounded-lg appearance-none cursor-pointer"
+                        />
+                      </div>
+
+                      <!-- Spotify Link -->
+                      <button
+                        onclick="openSpotify()"
+                        class="w-10 h-10 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center text-white shadow-lg transition-all duration-200 hover:scale-105"
+                        title="Open in Spotify"
+                      >
+                        <span class="text-sm">🎵</span>
+                      </button>
+
+                      <!-- Choose New Song -->
+                      <button
+                        onclick="selectNewSong()"
+                        class="px-4 py-2 bg-gradient-to-r from-sage-400 to-warm-400 hover:from-sage-500 hover:to-warm-500 rounded-full text-white font-medium shadow-lg transition-all duration-200 hover:scale-105"
+                      >
+                        Choose New Song
+                      </button>
+                    </div>
+
+                    <!-- Music Status -->
+                    <div class="text-center">
+                      <div
+                        class="inline-flex items-center space-x-2 text-sm text-cream-600 bg-cream-100 px-4 py-2 rounded-full"
+                      >
+                        <div
+                          class="w-2 h-2 bg-green-400 rounded-full animate-pulse"
+                          id="music-status-dot"
+                        ></div>
+                        <span id="music-status-text">Ready to play</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div class="text-center p-4 bg-warm-50 rounded-lg">
-                  <div class="text-2xl mb-2">💝</div>
-                  <h4 class="font-medium text-cream-900 mb-1">
-                    LET'S TALK ABOUT MUSIC!
-                  </h4>
-                  <p class="text-sm text-cream-600">My response in melodies</p>
-                </div>
-              </div>
-              <div class="text-center mt-6">
-                <p class="text-sm text-cream-500 italic">
-                  "Sometimes the best conversations happen in silence, with
-                  music as our translator"
-                </p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Letters We Never Sent Section -->
+      <!-- Music Player -->
+      <div
+        id="music-player"
+        class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-cream-200 p-4 shadow-lg transform transition-all duration-500 z-40 hidden"
+      >
+        <!-- ... existing music player code ... -->
+      </div>
+
+      <!-- Music Queue Section -->
+      <div class="max-w-4xl mx-auto mt-8">
+        <div
+          class="glass-effect rounded-2xl p-6 hover:shadow-xl transition-all duration-300"
+        >
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h3
+                class="font-display text-xl font-semibold text-cream-900 dark:text-cream-200 mb-2"
+              >
+                🎵 Music Queue
+              </h3>
+              <p class="text-cream-600 dark:text-cream-400 text-sm">
+                Songs lined up for your jamming session
+              </p>
+            </div>
+            <button
+              onclick="clearQueue()"
+              class="px-4 py-2 bg-cream-200 dark:bg-cream-700 hover:bg-cream-300 dark:hover:bg-cream-600 text-cream-700 dark:text-cream-300 rounded-lg text-sm transition-all duration-200"
+            >
+              Clear Queue
+            </button>
+          </div>
+
+          <!-- Queue List -->
+          <div id="queue-container" class="space-y-3">
+            <div id="queue-empty" class="text-center py-8">
+              <div class="text-4xl mb-4">🎶</div>
+              <h4
+                class="text-lg font-semibold text-cream-800 dark:text-cream-300 mb-2"
+              >
+                Queue is empty
+              </h4>
+              <p class="text-cream-600 dark:text-cream-400 text-sm">
+                Add songs to create your perfect playlist
+              </p>
+            </div>
+          </div>
+
+          <!-- Queue Controls -->
+          <div
+            class="flex items-center justify-between mt-6 pt-4 border-t border-cream-200 dark:border-cream-700"
+          >
+            <div
+              class="flex items-center space-x-4 text-sm text-cream-600 dark:text-cream-400"
+            >
+              <span id="queue-count">0 songs</span>
+              <span>•</span>
+              <span id="queue-duration">0:00 total</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button
+                onclick="shuffleQueue()"
+                class="px-3 py-1 bg-warm-400 hover:bg-warm-500 text-white rounded-lg text-sm transition-all duration-200"
+                title="Shuffle queue"
+              >
+                🔀 Shuffle
+              </button>
+              <button
+                onclick="exportQueue()"
+                class="px-3 py-1 bg-sage-400 hover:bg-sage-500 text-white rounded-lg text-sm transition-all duration-200"
+                title="Export playlist"
+              >
+                📤 Export
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Letters Section - REAL-TIME -->
       <section id="letters" class="py-20 bg-sage-50/30 relative">
         <div class="section-container">
           <div class="text-center mb-16">
             <h2
               class="font-display text-4xl md:text-5xl font-bold text-cream-900 mb-6"
             >
-              Letters We Never Sent 💌
+              Letters From The Heart 💌
             </h2>
             <p class="text-lg text-cream-700 max-w-2xl mx-auto">
-              Words that lived in playlist descriptions, waiting to be heard
+              Messages that travel between our hearts, in real-time
             </p>
           </div>
 
-          <!-- Letter Display -->
+          <!-- Letters Display - REAL-TIME -->
           <div class="max-w-4xl mx-auto">
-            <div class="grid md:grid-cols-2 gap-8">
-              <!-- Your Letter -->
-              <div
-                class="glass-effect rounded-xl p-8 transform hover:scale-105 transition-all duration-300"
-              >
-                <div class="flex items-center space-x-3 mb-6">
-                  <div
-                    class="w-10 h-10 bg-gradient-to-br from-sage-400 to-sage-600 rounded-full flex items-center justify-center"
-                  >
-                    <span class="text-white text-sm">💔</span>
-                  </div>
-                  <div>
-                    <h3
-                      class="font-display text-lg font-semibold text-cream-900"
-                    >
-                      From Your Heart
-                    </h3>
-                    <p class="text-sm text-cream-600">
-                      A Letter I've Never Sent
-                    </p>
-                  </div>
-                </div>
+            <div id="letters-container" class="space-y-6">
+              <!-- Loading State -->
+              <div id="letters-loading" class="text-center py-12">
                 <div
-                  class="bg-cream-50 rounded-lg p-6 border-l-4 border-sage-400"
-                >
-                  <p class="text-cream-700 italic leading-relaxed">
-                    "All the disappointments, all the words I couldn't say...
-                    They lived here, in these songs, hoping someday you'd
-                    understand what my silence was trying to tell you."
-                  </p>
-                  <div class="mt-4 text-right">
-                    <span class="text-sm text-cream-500"
-                      >— Hidden in melodies</span
-                    >
-                  </div>
-                </div>
+                  class="animate-spin w-8 h-8 border-2 border-cream-400 border-t-transparent rounded-full mx-auto mb-4"
+                ></div>
+                <p class="text-cream-600">Loading letters...</p>
               </div>
 
-              <!-- My Response -->
-              <div
-                class="glass-effect rounded-xl p-8 transform hover:scale-105 transition-all duration-300"
-              >
-                <div class="flex items-center space-x-3 mb-6">
-                  <div
-                    class="w-10 h-10 bg-gradient-to-br from-warm-400 to-warm-600 rounded-full flex items-center justify-center"
-                  >
-                    <span class="text-white text-sm">💝</span>
-                  </div>
-                  <div>
-                    <h3
-                      class="font-display text-lg font-semibold text-cream-900"
-                    >
-                      From My Heart
-                    </h3>
-                    <p class="text-sm text-cream-600">
-                      LET'S TALK ABOUT MUSIC!
-                    </p>
-                  </div>
-                </div>
-                <div
-                  class="bg-warm-50 rounded-lg p-6 border-l-4 border-warm-400"
-                >
-                  <p class="text-cream-700 italic leading-relaxed">
-                    "I heard you. Every note, every pause, every song you chose.
-                    This is my answer - not just in music, but in creating a
-                    space where your heart can finally rest."
-                  </p>
-                  <div class="mt-4 text-right">
-                    <span class="text-sm text-cream-500"
-                      >— With all my hope</span
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Write New Letter Section -->
-            <div class="mt-12 text-center">
-              <div class="glass-effect rounded-xl p-8">
-                <h3
-                  class="font-display text-xl font-semibold text-cream-900 mb-4"
-                >
-                  Ready to write a new chapter?
-                </h3>
-                <p class="text-cream-600 mb-6">
-                  Maybe it's time we moved from playlist descriptions to real
-                  conversations...
-                </p>
-                <button
-                  onclick="scrollToSection('bottles')"
-                  class="btn-primary bg-gradient-to-r from-sage-400 to-cream-500 text-white rounded-full font-medium hover:shadow-lg transition-all duration-300 hover:scale-105"
-                >
-                  Send a Message 💌
-                </button>
-              </div>
+              <!-- Letters will be populated here -->
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Daily Sanctuary Section -->
-      <section id="sanctuary" class="py-20 bg-warm-50/30 relative">
+      <!-- Messages Section - REAL-TIME -->
+      <section id="messages" class="py-20 bg-warm-50/30 relative">
         <div class="section-container">
           <div class="text-center mb-16">
             <h2
               class="font-display text-4xl md:text-5xl font-bold text-cream-900 mb-6"
             >
-              Daily Sanctuary 🍃
+              Send a Message 💝
             </h2>
             <p class="text-lg text-cream-700 max-w-2xl mx-auto">
-              A peaceful corner for your introvert heart to recharge and breathe
-            </p>
-          </div>
-
-          <div class="max-w-5xl mx-auto">
-            <div class="grid md:grid-cols-3 gap-8">
-              <!-- Mood Check -->
-              <div class="glass-effect rounded-xl p-6 text-center">
-                <div
-                  class="w-16 h-16 bg-gradient-to-br from-sage-400 to-sage-600 rounded-full flex items-center justify-center mx-auto mb-4"
-                >
-                  <span class="text-2xl">🌸</span>
-                </div>
-                <h3
-                  class="font-display text-xl font-semibold text-cream-900 mb-3"
-                >
-                  How are you feeling?
-                </h3>
-                <div class="space-y-2">
-                  <button
-                    class="mood-btn w-full py-2 px-4 bg-cream-100 hover:bg-sage-200 rounded-lg transition-colors text-cream-800"
-                  >
-                    😊 Peaceful
-                  </button>
-                  <button
-                    class="mood-btn w-full py-2 px-4 bg-cream-100 hover:bg-sage-200 rounded-lg transition-colors text-cream-800"
-                  >
-                    😔 Overwhelmed
-                  </button>
-                  <button
-                    class="mood-btn w-full py-2 px-4 bg-cream-100 hover:bg-sage-200 rounded-lg transition-colors text-cream-800"
-                  >
-                    💭 Thoughtful
-                  </button>
-                  <button
-                    class="mood-btn w-full py-2 px-4 bg-cream-100 hover:bg-sage-200 rounded-lg transition-colors text-cream-800"
-                  >
-                    ✨ Hopeful
-                  </button>
-                </div>
-              </div>
-
-              <!-- Daily Comfort -->
-              <div class="glass-effect rounded-xl p-6 text-center">
-                <div
-                  class="w-16 h-16 bg-gradient-to-br from-warm-400 to-warm-600 rounded-full flex items-center justify-center mx-auto mb-4"
-                >
-                  <span class="text-2xl">💝</span>
-                </div>
-                <h3
-                  class="font-display text-xl font-semibold text-cream-900 mb-3"
-                >
-                  Today's Comfort Note
-                </h3>
-                <div class="bg-warm-50 rounded-lg p-4 border border-warm-200">
-                  <p
-                    class="text-cream-700 italic text-sm leading-relaxed"
-                    id="daily-note"
-                  >
-                    "You don't have to be anything other than yourself. Your
-                    quiet strength, your love for music, your gentle heart -
-                    they're all perfect exactly as they are."
-                  </p>
-                </div>
-                <button
-                  onclick="getNewNote()"
-                  class="mt-4 text-sm text-warm-600 hover:text-warm-800 transition-colors"
-                >
-                  Get new note ✨
-                </button>
-              </div>
-
-              <!-- Breathing Space -->
-              <div class="glass-effect rounded-xl p-6 text-center">
-                <div
-                  class="w-16 h-16 bg-gradient-to-br from-cream-400 to-cream-600 rounded-full flex items-center justify-center mx-auto mb-4"
-                >
-                  <span class="text-2xl">🫧</span>
-                </div>
-                <h3
-                  class="font-display text-xl font-semibold text-cream-900 mb-3"
-                >
-                  Take a Breath
-                </h3>
-                <div class="space-y-4">
-                  <div
-                    class="w-20 h-20 mx-auto border-2 border-cream-300 rounded-full flex items-center justify-center"
-                    id="breathing-circle"
-                  >
-                    <div
-                      class="w-12 h-12 bg-cream-200 rounded-full animate-pulse"
-                    ></div>
-                  </div>
-                  <button
-                    onclick="startBreathing()"
-                    class="btn-primary bg-gradient-to-r from-cream-400 to-sage-400 text-white rounded-lg font-medium transition-all duration-300 hover:scale-105"
-                  >
-                    Start Breathing Exercise
-                  </button>
-                  <p class="text-xs text-cream-600" id="breathing-instruction">
-                    Click to begin a gentle 4-7-8 breathing pattern
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Message in a Bottle Section -->
-      <section
-        id="bottles"
-        class="py-20 bg-cream-50/30 relative overflow-hidden"
-      >
-        <!-- Floating Bottles Background -->
-        <div class="absolute inset-0 pointer-events-none">
-          <div
-            class="absolute top-20 left-10 text-4xl text-cream-300 opacity-30 animate-float"
-          >
-            🫧
-          </div>
-          <div
-            class="absolute top-40 right-16 text-2xl text-sage-300 opacity-40 animate-float"
-            style="animation-delay: 1s"
-          >
-            💌
-          </div>
-          <div
-            class="absolute bottom-32 left-1/4 text-3xl text-warm-300 opacity-20 animate-float"
-            style="animation-delay: 2s"
-          >
-            🫧
-          </div>
-          <div
-            class="absolute top-1/2 right-1/4 text-xl text-cream-400 opacity-35 animate-float"
-            style="animation-delay: 0.5s"
-          >
-            💌
-          </div>
-        </div>
-
-        <div class="section-container relative">
-          <div class="text-center mb-16">
-            <h2
-              class="font-display text-4xl md:text-5xl font-bold text-cream-900 mb-6"
-            >
-              Message in a Bottle 🫧
-            </h2>
-            <p class="text-lg text-cream-700 max-w-2xl mx-auto">
-              Send your thoughts into the universe. Sometimes the most beautiful
-              messages are the ones we set free.
+              Share what's in your heart. Your message will appear in their
+              letters instantly.
             </p>
           </div>
 
           <div class="max-w-3xl mx-auto">
             <!-- Message Form -->
             <div class="glass-effect rounded-xl p-8 mb-8">
-              <div class="text-center mb-6">
-                <div
-                  class="w-20 h-20 bg-gradient-to-br from-cream-400 to-sage-500 rounded-full flex items-center justify-center mx-auto mb-4"
-                >
-                  <span class="text-3xl">💌</span>
-                </div>
-                <h3 class="font-display text-xl font-semibold text-cream-900">
-                  What's in your heart today?
-                </h3>
-              </div>
-
-              <form id="bottle-form" class="space-y-6">
+              <form id="message-form" class="space-y-6">
                 <div>
                   <label class="block text-cream-700 font-medium mb-2"
                     >Your message:</label
@@ -810,53 +645,39 @@
                     id="message-text"
                     rows="4"
                     class="w-full p-4 bg-cream-50 border border-cream-200 rounded-lg focus:ring-2 focus:ring-warm-400 focus:border-transparent resize-none text-cream-800"
-                    placeholder="Share your thoughts, feelings, hopes, or dreams..."
-                    maxlength="500"
+                    placeholder="Share your thoughts, feelings, or what happened today..."
+                    maxlength="1000"
+                    required
                   ></textarea>
                   <div class="text-right mt-1">
                     <span class="text-xs text-cream-500" id="char-count"
-                      >0/500</span
+                      >0/1000</span
                     >
                   </div>
-                </div>
-
-                <div>
-                  <label class="block text-cream-700 font-medium mb-2"
-                    >Sign as (optional):</label
-                  >
-                  <input
-                    type="text"
-                    id="message-signature"
-                    class="w-full p-3 bg-cream-50 border border-cream-200 rounded-lg focus:ring-2 focus:ring-warm-400 focus:border-transparent text-cream-800"
-                    placeholder="Anonymous, A dreamer, Someone who cares..."
-                    maxlength="50"
-                  />
                 </div>
 
                 <button
                   type="submit"
                   class="w-full btn-primary bg-gradient-to-r from-warm-400 to-sage-500 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center justify-center space-x-2"
+                  id="send-button"
                 >
-                  <span>Send to the Universe</span>
-                  <span>🫧</span>
+                  <span>Send Message</span>
+                  <span>💌</span>
                 </button>
               </form>
             </div>
 
-            <!-- Message Counter -->
+            <!-- Connection Status -->
             <div class="text-center">
-              <div class="glass-effect rounded-xl p-6">
-                <div class="flex items-center justify-center space-x-4">
-                  <span class="text-2xl">🌊</span>
-                  <div>
-                    <p class="text-cream-600">Messages sent to the universe:</p>
-                    <p
-                      class="text-2xl font-bold text-cream-900"
-                      id="message-counter"
-                    >
-                      0
-                    </p>
-                  </div>
+              <div class="glass-effect rounded-xl p-4">
+                <div class="flex items-center justify-center space-x-2 text-sm">
+                  <div
+                    class="w-2 h-2 bg-green-400 rounded-full animate-pulse"
+                    id="connection-dot"
+                  ></div>
+                  <span class="text-cream-600" id="connection-text"
+                    >Connected to your heart ✨</span
+                  >
                 </div>
               </div>
             </div>
@@ -871,27 +692,130 @@
             <h3 class="font-display text-2xl font-semibold mb-2">
               Where You Belong
             </h3>
-            <p class="text-cream-300">A quiet corner made with endless love</p>
+            <p class="text-cream-300">
+              A place where hearts connect through music and words
+            </p>
           </div>
           <div class="text-sm text-cream-400">
             <p class="mb-2">
-              "In a world full of noise, I wanted to create a place of peace for
-              you."
+              "Every song, every message, every moment - crafted with love"
             </p>
-            <p>
-              Made with 💝 for someone who deserves all the beautiful things in
-              life
-            </p>
-          </div>
-          <div class="mt-8 pt-6 border-t border-cream-700">
-            <p class="text-xs text-cream-500">
-              Remember: You belong here, you belong with peace, and you belong
-              with happiness ✨
-            </p>
+            <p>Real-time connection powered by love 💝</p>
           </div>
         </div>
       </footer>
     </main>
+
+    <!-- Music Selection Modal - FIXED -->
+    <div
+      id="music-modal"
+      class="fixed inset-0 modal-overlay bg-black/60 z-[9999] hidden flex items-center justify-center p-4"
+    >
+      <div
+        class="glass-modal rounded-2xl max-w-5xl w-full modal-content shadow-2xl"
+      >
+        <!-- Modal Header -->
+        <div class="p-6 border-b border-cream-200/50">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-2xl font-bold text-cream-900">
+                🎵 Choose Today's Comfort Song
+              </h3>
+              <p class="text-cream-600 text-sm mt-1">
+                Find the perfect song to share with someone special
+              </p>
+            </div>
+            <button
+              onclick="closeMusicModal()"
+              class="w-10 h-10 bg-cream-100 hover:bg-cream-200 rounded-full flex items-center justify-center text-cream-600 hover:text-cream-800 transition-all duration-200 text-xl font-bold"
+            >
+              ×
+            </button>
+          </div>
+
+          <!-- Search Bar -->
+          <div class="relative">
+            <input
+              type="text"
+              id="spotify-search"
+              placeholder="Search for songs, artists, or albums... (try: Taylor Swift, LANY, Keshi)"
+              class="search-input w-full p-4 pl-12 bg-white/80 border-2 border-cream-200 rounded-xl focus:ring-2 focus:ring-warm-400 focus:border-warm-400 transition-all duration-200 text-cream-800 placeholder-cream-500"
+            />
+            <div
+              class="absolute left-4 top-1/2 transform -translate-y-1/2 text-cream-400 text-xl"
+            >
+              🔍
+            </div>
+            <div
+              id="search-status"
+              class="absolute right-4 top-1/2 transform -translate-y-1/2 hidden"
+            >
+              <div
+                class="w-5 h-5 border-2 border-warm-400 border-t-transparent rounded-full animate-spin"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Content -->
+        <div class="modal-body p-6">
+          <!-- Loading State -->
+          <div id="spotify-loading" class="text-center py-12 hidden">
+            <div
+              class="w-12 h-12 border-3 border-warm-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"
+            ></div>
+            <p class="text-cream-600 font-medium">Searching Spotify...</p>
+          </div>
+
+          <!-- Featured Tracks -->
+          <div id="featured-section">
+            <div class="flex items-center space-x-2 mb-6">
+              <span class="text-2xl">✨</span>
+              <h4 class="text-xl font-bold text-cream-800">
+                Recommended for You
+              </h4>
+            </div>
+            <div id="featured-tracks" class="space-y-3">
+              <!-- Featured tracks will be populated here -->
+            </div>
+          </div>
+
+          <!-- Search Results -->
+          <div id="search-results-section" class="hidden">
+            <div class="flex items-center justify-between mb-6">
+              <div class="flex items-center space-x-2">
+                <span class="text-2xl">🔍</span>
+                <h4 class="text-xl font-bold text-cream-800">Search Results</h4>
+              </div>
+              <button
+                onclick="clearSearch()"
+                class="text-sm text-cream-500 hover:text-cream-700 underline"
+              >
+                Back to recommendations
+              </button>
+            </div>
+            <div id="search-results" class="space-y-3">
+              <!-- Search results will be populated here -->
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div id="empty-state" class="text-center py-12 hidden">
+            <div class="text-6xl mb-4">🎵</div>
+            <h4 class="text-xl font-bold text-cream-800 mb-2">
+              No songs found
+            </h4>
+            <p class="text-cream-600 mb-4">Try searching for something else</p>
+            <button
+              onclick="clearSearch()"
+              class="px-4 py-2 bg-warm-400 hover:bg-warm-500 text-white rounded-lg transition-colors"
+            >
+              Browse Recommendations
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Console Easter Egg -->
     <script>
@@ -914,6 +838,7 @@
     </script>
 
     <!-- JavaScript -->
+    <script src="src/js/spotify.js"></script>
     <script src="src/js/main.js"></script>
   </body>
 </html>

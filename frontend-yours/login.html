@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Where You Belong ✨</title>
+
+    <!-- Tailwind CSS -->
+    <link href="./dist/css/output.css" rel="stylesheet" />
+
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>"
+    />
+
+    <!-- Meta Tags -->
+    <meta
+      name="description"
+      content="Login to Where You Belong - A musical journey"
+    />
+    <meta name="theme-color" content="#d4a574" />
+  </head>
+  <body class="overflow-x-hidden">
+    <!-- Background Elements -->
+    <div
+      class="fixed inset-0 -z-10 bg-gradient-to-br from-cream-50 to-warm-50 dark:from-cream-900 dark:to-warm-900"
+    >
+      <!-- Floating particles -->
+      <div
+        class="absolute top-20 left-10 w-2 h-2 bg-cream-400 rounded-full animate-twinkle"
+      ></div>
+      <div
+        class="absolute top-40 right-20 w-1 h-1 bg-sage-400 rounded-full animate-twinkle"
+        style="animation-delay: 1s"
+      ></div>
+      <div
+        class="absolute bottom-40 left-1/4 w-1.5 h-1.5 bg-warm-400 rounded-full animate-twinkle"
+        style="animation-delay: 2s"
+      ></div>
+      <div
+        class="absolute top-1/3 right-1/3 w-1 h-1 bg-cream-500 rounded-full animate-twinkle"
+        style="animation-delay: 0.5s"
+      ></div>
+      <div
+        class="absolute bottom-20 right-10 w-2 h-2 bg-sage-300 rounded-full animate-twinkle"
+        style="animation-delay: 1.5s"
+      ></div>
+
+      <!-- Floating music notes -->
+      <div class="absolute inset-0 pointer-events-none overflow-hidden">
+        <div
+          class="absolute top-1/4 left-1/4 text-4xl text-cream-300 dark:text-cream-700 opacity-20 animate-float"
+        >
+          ♪
+        </div>
+        <div
+          class="absolute top-1/3 right-1/4 text-2xl text-warm-300 dark:text-warm-700 opacity-30 animate-float"
+          style="animation-delay: 1s"
+        >
+          ♫
+        </div>
+        <div
+          class="absolute bottom-1/3 left-1/3 text-3xl text-sage-300 dark:text-sage-700 opacity-25 animate-float"
+          style="animation-delay: 2s"
+        >
+          ♪
+        </div>
+        <div
+          class="absolute top-1/2 right-1/3 text-xl text-cream-400 dark:text-cream-600 opacity-20 animate-float"
+          style="animation-delay: 0.5s"
+        >
+          ♬
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Container -->
+    <div class="min-h-screen flex items-center justify-center p-6">
+      <div class="w-full max-w-md">
+        <!-- Login Card -->
+        <div class="glass-effect rounded-3xl p-8 md:p-10 shadow-2xl">
+          <!-- Logo and Title -->
+          <div class="text-center mb-8">
+            <div class="flex justify-center mb-4">
+              <div
+                class="w-20 h-20 bg-gradient-to-br from-warm-400 to-cream-500 rounded-full flex items-center justify-center shadow-lg"
+              >
+                <span class="text-4xl">🎵</span>
+              </div>
+            </div>
+            <h1
+              class="font-display text-3xl font-bold text-cream-900 dark:text-cream-100 mb-2"
+            >
+              Where You Belong
+            </h1>
+            <p class="text-cream-600 dark:text-cream-300">
+              Masuk dengan akun Spotify untuk memulai perjalanan musikmu
+            </p>
+          </div>
+
+          <!-- Login Button -->
+          <div class="mb-8">
+            <a
+              href="http://localhost:3000/login"
+              class="w-full py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl flex items-center justify-center font-medium transition-all duration-300 shadow-lg"
+            >
+              <svg
+                class="w-6 h-6 mr-2"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 496 512"
+              >
+                <path
+                  fill="currentColor"
+                  d="M248 8C111.1 8 0 119.1 0 256s111.1 248 248 248 248-111.1 248-248S384.9 8 248 8Z"
+                />
+                <path
+                  fill="#191414"
+                  d="M406.6 231.1c-5.2 0-8.4-1.3-12.9-3.9-71.2-42.5-198.5-52.7-280.9-29.7-3.6 1-8.1 2.6-12.9 2.6-13.2 0-23.3-10.3-23.3-23.6 0-13.6 8.4-21.3 17.4-23.9 35.2-10.3 74.6-15.2 117.5-15.2 73 0 149.5 15.2 205.4 47.8 7.8 4.5 12.9 10.7 12.9 22.6 0 13.6-11 23.3-23.2 23.3zm-31 76.2c-5.2 0-8.7-2.3-12.3-4.2-62.5-37-155.7-51.9-238.6-29.4-4.8 1.3-7.4 2.6-11.9 2.6-10.7 0-19.4-8.7-19.4-19.4s5.2-17.8 15.5-20.7c27.8-7.8 56.2-13.6 97.8-13.6 64.9 0 127.6 16.1 177 45.5 8.1 4.8 11.3 11 11.3 19.7-.1 10.8-8.5 19.5-19.4 19.5zm-26.9 65.6c-4.2 0-6.8-1.3-10.7-3.6-62.4-37.6-135-39.2-206.7-24.5-3.9 1-9 2.6-11.9 2.6-9.7 0-15.8-7.7-15.8-15.8 0-10.3 6.1-15.2 13.6-16.8 81.9-18.1 165.6-16.5 237 26.2 6.1 3.9 9.7 7.4 9.7 16.5s-7.1 15.4-15.2 15.4z"
+                />
+              </svg>
+              Masuk dengan Spotify
+            </a>
+          </div>
+
+          <!-- Separator -->
+          <div class="flex items-center mb-8">
+            <div class="flex-1 h-px bg-cream-200 dark:bg-cream-700"></div>
+            <div class="px-4 text-cream-400 dark:text-cream-500 text-sm">
+              atau
+            </div>
+            <div class="flex-1 h-px bg-cream-200 dark:bg-cream-700"></div>
+          </div>
+
+          <!-- Demo Access -->
+          <div class="text-center">
+            <p class="text-cream-600 dark:text-cream-400 mb-4">
+              Ingin mencoba tanpa login?
+            </p>
+            <a
+              href="index.html"
+              class="inline-block px-8 py-3 border-2 border-warm-400 hover:border-warm-500 text-warm-500 hover:text-warm-600 dark:text-warm-400 dark:hover:text-warm-300 rounded-lg font-medium transition-all duration-300"
+            >
+              Mode Demo
+            </a>
+          </div>
+        </div>
+
+        <!-- Description Text -->
+        <div
+          class="mt-8 text-center text-cream-600 dark:text-cream-400 text-sm"
+        >
+          <p class="mb-2">
+            "Where You Belong" menggunakan Spotify untuk memperlancar pengalaman
+            musik Anda.
+          </p>
+          <p>
+            Kami hanya mengakses data profil dan status musik Anda, tanpa
+            menyimpan password.
+          </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-12 text-center text-cream-500 dark:text-cream-600">
+          <div class="inline-flex items-center space-x-2 text-sm">
+            <span>Crafted with</span>
+            <span class="text-warm-500 animate-pulse text-base">♥</span>
+            <span>and countless hours of hope</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dark Mode Toggle -->
+    <button
+      id="theme-toggle"
+      class="fixed top-6 right-6 w-10 h-10 bg-cream-100 dark:bg-cream-800 hover:bg-cream-200 dark:hover:bg-cream-700 rounded-full flex items-center justify-center text-cream-600 dark:text-cream-300 transition-all duration-200 hover:scale-105 shadow-lg z-50"
+      title="Toggle theme"
+    >
+      <span id="theme-icon" class="text-lg">🌙</span>
+    </button>
+
+    <!-- JavaScript -->
+    <script>
+      // Handle theme toggle
+      document.addEventListener("DOMContentLoaded", function () {
+        // Check for saved theme preference or default to light mode
+        const savedTheme = localStorage.getItem("theme") || "light";
+        setTheme(savedTheme);
+
+        // Add event listeners
+        document
+          .getElementById("theme-toggle")
+          .addEventListener("click", toggleTheme);
+
+        // Check for auth error from Spotify
+        const urlParams = new URLSearchParams(
+          window.location.hash.substring(1)
+        );
+        const error = urlParams.get("error");
+
+        if (error) {
+          showErrorMessage("Login gagal, silakan coba lagi.");
+        }
+
+        // Function to show error message
+        function showErrorMessage(message) {
+          const container = document.querySelector(".glass-effect");
+
+          const errorDiv = document.createElement("div");
+          errorDiv.className =
+            "bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mt-6";
+          errorDiv.innerHTML = `<p>${message}</p>`;
+
+          container.appendChild(errorDiv);
+        }
+      });
+
+      function toggleTheme() {
+        const currentTheme =
+          document.documentElement.getAttribute("data-theme");
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        setTheme(newTheme);
+        localStorage.setItem("theme", newTheme);
+      }
+
+      function setTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        if (theme === "dark") {
+          document.documentElement.classList.add("dark");
+          document.getElementById("theme-icon").textContent = "☀️";
+        } else {
+          document.documentElement.classList.remove("dark");
+          document.getElementById("theme-icon").textContent = "🌙";
+        }
+      }
+    </script>
+
+    <style>
+      .glass-effect {
+        background-color: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .dark .glass-effect {
+        background-color: rgba(31, 31, 31, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      @keyframes twinkle {
+        0% {
+          opacity: 0.3;
+        }
+        50% {
+          opacity: 0.8;
+        }
+        100% {
+          opacity: 0.3;
+        }
+      }
+
+      .animate-twinkle {
+        animation: twinkle 3s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+
+      .animate-float {
+        animation: float 6s ease-in-out infinite;
+      }
+    </style>
+  </body>
+</html>

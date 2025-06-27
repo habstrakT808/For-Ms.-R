@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spotify Login Success - Where You Belong</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>"
+    />
+
+    <!-- Meta Tags -->
+    <meta name="description" content="Login Successful - Where You Belong" />
+    <meta name="theme-color" content="#d4a574" />
+  </head>
+  <body
+    class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen flex items-center justify-center"
+  >
+    <div
+      class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 max-w-md w-full mx-4 text-center"
+    >
+      <div class="mb-6">
+        <i class="fab fa-spotify text-green-400 text-6xl mb-4"></i>
+        <h1 class="text-2xl font-bold text-white mb-2">Login Successful!</h1>
+        <p class="text-gray-300">Connecting to Spotify...</p>
+      </div>
+
+      <div class="mb-6">
+        <div
+          class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-400 mx-auto"
+        ></div>
+      </div>
+
+      <p class="text-sm text-gray-400">You will be redirected automatically</p>
+    </div>
+
+    <script>
+      // Extract tokens from URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const accessToken = urlParams.get("access_token");
+      const refreshToken = urlParams.get("refresh_token");
+      const expiresIn = urlParams.get("expires_in");
+      const userId = urlParams.get("user_id");
+      const userName = urlParams.get("user_name");
+      const userType = urlParams.get("user_type");
+
+      if (accessToken) {
+        // Store auth data in localStorage
+        const authData = {
+          accessToken,
+          refreshToken,
+          expiresIn: parseInt(expiresIn),
+          userId,
+          userName,
+          userType,
+          loginTime: Date.now(),
+        };
+
+        localStorage.setItem("spotify_auth_data", JSON.stringify(authData));
+
+        console.log("✅ Spotify auth data saved:", authData);
+
+        // Redirect to main app after 2 seconds
+        setTimeout(() => {
+          window.location.href = "/index.html";
+        }, 2000);
+      } else {
+        // Handle error
+        console.error("❌ No access token received");
+        setTimeout(() => {
+          window.location.href = "/login.html?error=no_token";
+        }, 2000);
+      }
+    </script>
+
+    <style>
+      .glass-effect {
+        background-color: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .dark .glass-effect {
+        background-color: rgba(31, 31, 31, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      @keyframes twinkle {
+        0% {
+          opacity: 0.3;
+        }
+        50% {
+          opacity: 0.8;
+        }
+        100% {
+          opacity: 0.3;
+        }
+      }
+
+      .animate-twinkle {
+        animation: twinkle 3s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+
+      .animate-float {
+        animation: float 6s ease-in-out infinite;
+      }
+
+      @keyframes progress {
+        0% {
+          left: -50%;
+          width: 50%;
+        }
+        100% {
+          left: 100%;
+          width: 50%;
+        }
+      }
+
+      .animate-progress {
+        animation: progress 1.5s ease-in-out infinite;
+      }
+    </style>
+  </body>
+</html>
