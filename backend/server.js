@@ -963,12 +963,22 @@ app.get("/login", (req, res) => {
   const state = generateRandomString(16);
   res.cookie(STATE_KEY, state);
 
+  // Deteksi user type dari query parameter atau default ke 'yours'
+  const userType = req.query.user_type || "yours";
+  const frontendPort = userType === "crush" ? "3002" : "3001";
+
   const scope =
-    "user-read-private user-read-email user-read-currently-playing streaming user-library-read";
+    "user-read-private user-read-email user-read-currently-playing streaming user-library-read user-read-playback-state user-modify-playback-state playlist-read-private playlist-read-collaborative";
 
   // Gunakan URI yang sesuai untuk callback umum
   const redirectUri =
     process.env.SPOTIFY_REDIRECT_URI || "http://127.0.0.1:3000/callback";
+
+  console.log(`🔗 Login requested for ${userType} (port: ${frontendPort})`);
+  console.log(`🔄 Using redirect URI: ${redirectUri}`);
+
+  // Tambahkan user type ke state untuk digunakan di callback
+  const stateWithUserType = `${userType}_${state}`;
 
   // Redirect to Spotify authorization page
   res.redirect(
@@ -978,21 +988,27 @@ app.get("/login", (req, res) => {
         client_id: SPOTIFY_CLIENT_ID,
         scope: scope,
         redirect_uri: redirectUri,
-        state: state,
+        state: stateWithUserType,
         show_dialog: true,
       })
   );
 });
 
-// Fungsi helper untuk handle callback
-async function handleSpotifyCallback(req, res, userId, frontendPort) {
-  const code = req.query.code || null;
-  const state = req.query.state || null;
+// Fallback callback route (untuk debugging)
+app.get("/callback", async (req, res) => {
+  console.log("📞 Fallback callback received");
+  console.log("Query params:", req.query);
 
-  console.log(`🔍 Callback received for ${userId}:`);
-  console.log(`   - Code: ${code ? "Present" : "Missing"}`);
-  console.log(`   - State: ${state}`);
-  console.log(`   - Frontend Port: ${frontendPort}`);
+  // Coba deteksi user dari state atau redirect ke yours sebagai default
+  const state = req.query.state || "";
+  const userId = state.includes("crush") ? "crush" : "yours";
+  const frontendPort = userId === "crush" ? "3002" : "3001";
+
+  console.log(
+    `🔄 Fallback: Detected user as ${userId}, redirecting to port ${frontendPort}`
+  );
+
+  const code = req.query.code || null;
 
   if (state === null || !code) {
     console.log(`❌ Missing code or state for ${userId}`);
@@ -1000,12 +1016,11 @@ async function handleSpotifyCallback(req, res, userId, frontendPort) {
     return;
   }
 
+  // PENTING: Gunakan redirect URI yang sama dengan yang digunakan untuk autentikasi
   const redirectUri =
-    userId === "yours"
-      ? process.env.SPOTIFY_REDIRECT_URI_YOURS
-      : process.env.SPOTIFY_REDIRECT_URI_CRUSH;
+    process.env.SPOTIFY_REDIRECT_URI || "http://127.0.0.1:3000/callback";
 
-  console.log(`🔄 Using redirect URI: ${redirectUri}`);
+  console.log(`🔄 Using redirect URI for token exchange: ${redirectUri}`);
 
   try {
     console.log(`🔑 Exchanging code for token...`);
@@ -1030,6 +1045,16 @@ async function handleSpotifyCallback(req, res, userId, frontendPort) {
     });
 
     console.log(`✅ Token exchange successful for ${userId}`);
+    console.log(
+      `✅ Access token received: ${
+        tokenResponse.data.access_token ? "Present" : "Missing"
+      }`
+    );
+    console.log(
+      `✅ Refresh token received: ${
+        tokenResponse.data.refresh_token ? "Present" : "Missing"
+      }`
+    );
 
     const { access_token, refresh_token, expires_in } = tokenResponse.data;
 
@@ -1072,36 +1097,83 @@ async function handleSpotifyCallback(req, res, userId, frontendPort) {
       `❌ Error during Spotify authentication for ${userId}:`,
       error.response?.data || error.message
     );
-    res.redirect(`http://127.0.0.1:${frontendPort}/#error=invalid_token`);
+
+    // Log more detailed error information
+    if (error.response) {
+      console.error(`❌ Error status: ${error.response.status}`);
+      console.error(`❌ Error data:`, error.response.data);
+    }
+
+    // Coba cara alternatif: redirect langsung ke frontend dengan kode
+    const alternativeRedirectUrl =
+      `http://127.0.0.1:${frontendPort}/auth-success.html?` +
+      querystring.stringify({
+        code: code,
+        state: state,
+        error: error.message,
+      });
+
+    console.log(`🔄 Trying alternative redirect to: ${alternativeRedirectUrl}`);
+    res.redirect(alternativeRedirectUrl);
   }
-}
-
-// Callback untuk frontend-yours (port 3001)
-app.get("/callback/yours", async (req, res) => {
-  console.log("📞 Callback received for YOURS");
-  await handleSpotifyCallback(req, res, "yours", "3001");
 });
 
-// Callback untuk frontend-crush (port 3002)
-app.get("/callback/crush", async (req, res) => {
-  console.log("📞 Callback received for CRUSH");
-  await handleSpotifyCallback(req, res, "crush", "3002");
-});
+// Tambahkan endpoint baru untuk menangani token exchange di frontend
+app.post("/api/spotify/exchange-token", async (req, res) => {
+  const { code, redirect_uri } = req.body;
 
-// Fallback callback route (untuk debugging)
-app.get("/callback", async (req, res) => {
-  console.log("📞 Fallback callback received");
-  console.log("Query params:", req.query);
+  if (!code) {
+    return res.status(400).json({ error: "Code is required" });
+  }
 
-  // Coba deteksi user dari state atau redirect ke yours sebagai default
-  const state = req.query.state || "";
-  const userId = state.includes("crush") ? "crush" : "yours";
-  const frontendPort = userId === "crush" ? "3002" : "3001";
+  console.log("📞 Token exchange request received");
+  console.log("Code:", code ? "Present" : "Missing");
+  console.log("Redirect URI:", redirect_uri);
 
-  console.log(
-    `🔄 Fallback: Detected user as ${userId}, redirecting to port ${frontendPort}`
-  );
-  await handleSpotifyCallback(req, res, userId, frontendPort);
+  try {
+    // Exchange authorization code for access token
+    const tokenResponse = await axios({
+      method: "post",
+      url: "https://accounts.spotify.com/api/token",
+      data: querystring.stringify({
+        code: code,
+        redirect_uri: redirect_uri || "http://127.0.0.1:3000/callback",
+        grant_type: "authorization_code",
+      }),
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization:
+          "Basic " +
+          Buffer.from(SPOTIFY_CLIENT_ID + ":" + SPOTIFY_CLIENT_SECRET).toString(
+            "base64"
+          ),
+      },
+    });
+
+    console.log("✅ Token exchange successful via API");
+
+    // Return tokens to frontend
+    res.json({
+      access_token: tokenResponse.data.access_token,
+      refresh_token: tokenResponse.data.refresh_token,
+      expires_in: tokenResponse.data.expires_in,
+    });
+  } catch (error) {
+    console.error(
+      "❌ Error during token exchange:",
+      error.response?.data || error.message
+    );
+
+    if (error.response) {
+      console.error(`❌ Error status: ${error.response.status}`);
+      console.error(`❌ Error data:`, error.response.data);
+    }
+
+    res.status(500).json({
+      error: "Failed to exchange token",
+      details: error.response?.data || error.message,
+    });
+  }
 });
 
 // Refresh token route
@@ -1161,6 +1233,62 @@ app.get("/api/user-profile", async (req, res) => {
   } catch (error) {
     console.error("Error fetching user profile:", error);
     res.status(500).json({ error: "Failed to fetch user profile" });
+  }
+});
+
+// Get currently playing track from Spotify
+app.get("/api/spotify/currently-playing", async (req, res) => {
+  const { access_token } = req.query;
+
+  if (!access_token) {
+    return res.status(401).json({ error: "Access token is required" });
+  }
+
+  try {
+    const response = await axios({
+      method: "get",
+      url: "https://api.spotify.com/v1/me/player/currently-playing",
+      headers: {
+        Authorization: "Bearer " + access_token,
+      },
+    });
+
+    // If no track is playing (204 No Content)
+    if (response.status === 204) {
+      return res.json({ isPlaying: false });
+    }
+
+    // If track is playing
+    const track = response.data.item;
+
+    // Format the response
+    const formattedResponse = {
+      isPlaying: response.data.is_playing,
+      progress_ms: response.data.progress_ms,
+      track: {
+        id: track.id,
+        name: track.name,
+        artist: track.artists.map((artist) => artist.name).join(", "),
+        album: track.album.name,
+        albumArt: track.album.images[0]?.url || null,
+        duration_ms: track.duration_ms,
+        spotifyUrl: track.external_urls.spotify,
+      },
+    };
+
+    res.json(formattedResponse);
+  } catch (error) {
+    console.error(
+      "Error fetching currently playing track:",
+      error.response?.data || error.message
+    );
+
+    // If error is 401 Unauthorized, token might be expired
+    if (error.response?.status === 401) {
+      return res.status(401).json({ error: "Spotify token expired" });
+    }
+
+    res.status(500).json({ error: "Failed to fetch currently playing track" });
   }
 });
 

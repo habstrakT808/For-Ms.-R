@@ -10,9 +10,11 @@ class SpotifyPlayer {
     this.deviceId = null;
     this.currentPreview = null;
     this.simulatedProgress = null; // Untuk simulasi progress ketika tidak ada preview
+    this.listeningActivityInterval = null; // Interval untuk update listening activity
 
     this.initializeSpotifySDK();
     this.loadFeaturedTracks();
+    this.initializeListeningActivity();
   }
 
   // Initialize Spotify Web Playback SDK
@@ -33,6 +35,263 @@ class SpotifyPlayer {
       this.loadSpotifyScript();
     } else {
       this.setupPlayer(authData.accessToken);
+    }
+  }
+
+  // Initialize listening activity feature
+  initializeListeningActivity() {
+    // Check for auth data
+    const authData = JSON.parse(
+      localStorage.getItem("spotify_auth_data") || "null"
+    );
+
+    // Only proceed if we have valid auth data
+    if (!authData || !authData.accessToken) {
+      console.log("🎵 No Spotify auth data for listening activity");
+      this.showLoginPromptInListeningActivity();
+      return;
+    }
+
+    // Start polling for currently playing track
+    this.startListeningActivityPolling(authData.accessToken);
+  }
+
+  // Start polling for currently playing track
+  startListeningActivityPolling(accessToken) {
+    // Clear any existing interval
+    if (this.listeningActivityInterval) {
+      clearInterval(this.listeningActivityInterval);
+    }
+
+    // Initial fetch
+    this.fetchCurrentlyPlaying(accessToken);
+
+    // Set up polling every 10 seconds
+    this.listeningActivityInterval = setInterval(() => {
+      this.fetchCurrentlyPlaying(accessToken);
+    }, 10000); // 10 seconds
+  }
+
+  // Fetch currently playing track from Spotify
+  async fetchCurrentlyPlaying(accessToken) {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/spotify/currently-playing?access_token=${accessToken}`
+      );
+
+      // Handle token expiration
+      if (response.status === 401) {
+        console.log("🎵 Spotify token expired, refreshing...");
+        this.refreshToken();
+        return;
+      }
+
+      const data = await response.json();
+
+      // Update the UI with the currently playing track
+      this.updateListeningActivityUI(data);
+    } catch (error) {
+      console.error("❌ Error fetching currently playing track:", error);
+      // Show error in the listening activity section
+      this.showListeningActivityError();
+    }
+  }
+
+  // Update the UI with currently playing track
+  updateListeningActivityUI(data) {
+    const listeningActivityContainer =
+      document.getElementById("listening-activity");
+
+    if (!listeningActivityContainer) {
+      console.log("Listening activity container not found");
+      return;
+    }
+
+    // If no track is playing
+    if (!data.isPlaying || !data.track) {
+      listeningActivityContainer.innerHTML = `
+        <div class="p-4 bg-gray-800 rounded-lg">
+          <div class="flex items-center">
+            <div class="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center">
+              <i class="fas fa-music text-gray-400"></i>
+            </div>
+            <div class="ml-3">
+              <p class="text-white text-sm">Not playing</p>
+              <p class="text-gray-400 text-xs">Spotify</p>
+            </div>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    // Format time
+    const formatTime = (ms) => {
+      const minutes = Math.floor(ms / 60000);
+      const seconds = Math.floor((ms % 60000) / 1000);
+      return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    };
+
+    const currentTime = formatTime(data.progress_ms);
+    const totalTime = formatTime(data.track.duration_ms);
+    const progressPercentage =
+      (data.progress_ms / data.track.duration_ms) * 100;
+
+    // Update the UI with the track info
+    listeningActivityContainer.innerHTML = `
+      <div class="p-4 bg-gray-800 rounded-lg">
+        <div class="text-sm text-gray-300 mb-2">
+          <span class="flex items-center">
+            <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+            Listening to Spotify
+          </span>
+        </div>
+        <div class="flex items-center">
+          <img src="${data.track.albumArt}" alt="${data.track.album}" class="w-12 h-12 rounded">
+          <div class="ml-3">
+            <p class="text-white text-sm font-medium">${data.track.name}</p>
+            <p class="text-gray-400 text-xs">${data.track.artist}</p>
+            <div class="mt-1">
+              <div class="w-32 bg-gray-700 rounded-full h-1">
+                <div class="bg-green-500 h-1 rounded-full" style="width: ${progressPercentage}%"></div>
+              </div>
+              <div class="flex justify-between text-xs text-gray-400 mt-1">
+                <span>${currentTime}</span>
+                <span>${totalTime}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-2">
+          <a href="${data.track.spotifyUrl}" target="_blank" class="flex items-center justify-center bg-green-600 hover:bg-green-700 text-white text-xs py-1 px-3 rounded-full w-full">
+            <i class="fab fa-spotify mr-1"></i> Play on Spotify
+          </a>
+        </div>
+      </div>
+    `;
+  }
+
+  // Show login prompt in listening activity section
+  showLoginPromptInListeningActivity() {
+    const listeningActivityContainer =
+      document.getElementById("listening-activity");
+
+    if (!listeningActivityContainer) return;
+
+    listeningActivityContainer.innerHTML = `
+      <div class="p-4 bg-gray-800 rounded-lg">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center">
+            <i class="fab fa-spotify text-gray-400 text-xl"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-white text-sm">Connect with Spotify</p>
+            <p class="text-gray-400 text-xs mb-2">to show your listening activity</p>
+            <button id="spotify-login-btn" class="bg-green-600 hover:bg-green-700 text-white text-xs py-1 px-3 rounded-full">
+              Connect
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Add event listener to the login button
+    const loginBtn = document.getElementById("spotify-login-btn");
+    if (loginBtn) {
+      loginBtn.addEventListener("click", () => {
+        // Use the main login endpoint with user_type parameter
+        window.location.href = "http://localhost:3000/login?user_type=crush";
+      });
+    }
+  }
+
+  // Show error in listening activity section
+  showListeningActivityError() {
+    const listeningActivityContainer =
+      document.getElementById("listening-activity");
+
+    if (!listeningActivityContainer) return;
+
+    listeningActivityContainer.innerHTML = `
+      <div class="p-4 bg-gray-800 rounded-lg">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center">
+            <i class="fas fa-exclamation-triangle text-yellow-500"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-white text-sm">Connection Error</p>
+            <p class="text-gray-400 text-xs">Unable to connect to Spotify</p>
+            <button id="retry-spotify-btn" class="mt-2 bg-gray-700 hover:bg-gray-600 text-white text-xs py-1 px-3 rounded-full">
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Add event listener to the retry button
+    const retryBtn = document.getElementById("retry-spotify-btn");
+    if (retryBtn) {
+      retryBtn.addEventListener("click", () => {
+        const authData = JSON.parse(
+          localStorage.getItem("spotify_auth_data") || "null"
+        );
+        if (authData && authData.accessToken) {
+          this.fetchCurrentlyPlaying(authData.accessToken);
+        } else {
+          this.showLoginPromptInListeningActivity();
+        }
+      });
+    }
+  }
+
+  // Refresh token when expired
+  async refreshToken() {
+    try {
+      const authData = JSON.parse(
+        localStorage.getItem("spotify_auth_data") || "null"
+      );
+
+      if (!authData || !authData.refreshToken) {
+        console.log("No refresh token available");
+        this.showLoginPromptInListeningActivity();
+        return;
+      }
+
+      const response = await fetch("http://localhost:3000/refresh_token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refresh_token: authData.refreshToken }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Update stored token
+        authData.accessToken = data.access_token;
+        localStorage.setItem("spotify_auth_data", JSON.stringify(authData));
+
+        // Restart polling with new token
+        this.startListeningActivityPolling(data.access_token);
+        console.log("Token refreshed successfully");
+      } else {
+        console.error("Failed to refresh token:", data.error);
+        this.showLoginPromptInListeningActivity();
+      }
+    } catch (error) {
+      console.error("Error refreshing token:", error);
+      this.showLoginPromptInListeningActivity();
+    }
+  }
+
+  // Stop listening activity polling
+  stopListeningActivityPolling() {
+    if (this.listeningActivityInterval) {
+      clearInterval(this.listeningActivityInterval);
+      this.listeningActivityInterval = null;
+      console.log("Listening activity polling stopped");
     }
   }
 
