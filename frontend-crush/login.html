@@ -95,69 +95,53 @@
               Where You Belong
             </h1>
             <p class="text-cream-600 dark:text-cream-300">
-              Masuk dengan akun Spotify untuk memulai perjalanan musikmu
+              Masukkan kata kunci untuk memulai perjalanan musikmu
             </p>
           </div>
 
-          <!-- Login Button -->
+          <!-- Login Form -->
           <div class="mb-8">
-            <a
-              href="http://localhost:3000/login"
-              class="w-full py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl flex items-center justify-center font-medium transition-all duration-300 shadow-lg"
-            >
-              <svg
-                class="w-6 h-6 mr-2"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 496 512"
+            <form id="loginForm" class="space-y-4">
+              <div>
+                <label
+                  for="password"
+                  class="block text-cream-700 dark:text-cream-300 mb-2"
+                  >Kata Kunci</label
+                >
+                <input
+                  type="password"
+                  id="password"
+                  class="w-full px-4 py-3 bg-cream-50 dark:bg-cream-800 border border-cream-200 dark:border-cream-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-warm-400"
+                  placeholder="Masukkan kata kunci..."
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                class="w-full py-4 bg-warm-500 hover:bg-warm-600 text-white rounded-xl flex items-center justify-center font-medium transition-all duration-300 shadow-lg"
               >
-                <path
-                  fill="currentColor"
-                  d="M248 8C111.1 8 0 119.1 0 256s111.1 248 248 248 248-111.1 248-248S384.9 8 248 8Z"
-                />
-                <path
-                  fill="#191414"
-                  d="M406.6 231.1c-5.2 0-8.4-1.3-12.9-3.9-71.2-42.5-198.5-52.7-280.9-29.7-3.6 1-8.1 2.6-12.9 2.6-13.2 0-23.3-10.3-23.3-23.6 0-13.6 8.4-21.3 17.4-23.9 35.2-10.3 74.6-15.2 117.5-15.2 73 0 149.5 15.2 205.4 47.8 7.8 4.5 12.9 10.7 12.9 22.6 0 13.6-11 23.3-23.2 23.3zm-31 76.2c-5.2 0-8.7-2.3-12.3-4.2-62.5-37-155.7-51.9-238.6-29.4-4.8 1.3-7.4 2.6-11.9 2.6-10.7 0-19.4-8.7-19.4-19.4s5.2-17.8 15.5-20.7c27.8-7.8 56.2-13.6 97.8-13.6 64.9 0 127.6 16.1 177 45.5 8.1 4.8 11.3 11 11.3 19.7-.1 10.8-8.5 19.5-19.4 19.5zm-26.9 65.6c-4.2 0-6.8-1.3-10.7-3.6-62.4-37.6-135-39.2-206.7-24.5-3.9 1-9 2.6-11.9 2.6-9.7 0-15.8-7.7-15.8-15.8 0-10.3 6.1-15.2 13.6-16.8 81.9-18.1 165.6-16.5 237 26.2 6.1 3.9 9.7 7.4 9.7 16.5s-7.1 15.4-15.2 15.4z"
-                />
-              </svg>
-              Masuk dengan Spotify
-            </a>
+                <span class="mr-2">🎵</span>
+                Masuk
+              </button>
+            </form>
+            <div
+              id="errorMessage"
+              class="hidden mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg"
+            ></div>
           </div>
 
-          <!-- Separator -->
-          <div class="flex items-center mb-8">
-            <div class="flex-1 h-px bg-cream-200 dark:bg-cream-700"></div>
-            <div class="px-4 text-cream-400 dark:text-cream-500 text-sm">
-              atau
-            </div>
-            <div class="flex-1 h-px bg-cream-200 dark:bg-cream-700"></div>
-          </div>
-
-          <!-- Demo Access -->
-          <div class="text-center">
-            <p class="text-cream-600 dark:text-cream-400 mb-4">
-              Ingin mencoba tanpa login?
+          <!-- Description Text -->
+          <div
+            class="mt-8 text-center text-cream-600 dark:text-cream-400 text-sm"
+          >
+            <p class="mb-2">
+              "Where You Belong" adalah tempat di mana musik menjadi penerjemah
+              perasaan.
             </p>
-            <a
-              href="index.html"
-              class="inline-block px-8 py-3 border-2 border-warm-400 hover:border-warm-500 text-warm-500 hover:text-warm-600 dark:text-warm-400 dark:hover:text-warm-300 rounded-lg font-medium transition-all duration-300"
-            >
-              Mode Demo
-            </a>
+            <p>
+              Masukkan kata kunci yang tepat untuk mengakses dunia musik kita.
+            </p>
           </div>
-        </div>
-
-        <!-- Description Text -->
-        <div
-          class="mt-8 text-center text-cream-600 dark:text-cream-400 text-sm"
-        >
-          <p class="mb-2">
-            "Where You Belong" menggunakan Spotify untuk memperlancar pengalaman
-            musik Anda.
-          </p>
-          <p>
-            Kami hanya mengakses data profil dan status musik Anda, tanpa
-            menyimpan password.
-          </p>
         </div>
 
         <!-- Footer -->
@@ -184,8 +168,8 @@
     <script>
       // Handle theme toggle
       document.addEventListener("DOMContentLoaded", function () {
-        // Check for saved theme preference or default to light mode
-        const savedTheme = localStorage.getItem("theme") || "light";
+        // Check for saved theme preference or default to dark mode
+        const savedTheme = localStorage.getItem("theme") || "dark";
         setTheme(savedTheme);
 
         // Add event listeners
@@ -193,27 +177,32 @@
           .getElementById("theme-toggle")
           .addEventListener("click", toggleTheme);
 
-        // Check for auth error from Spotify
-        const urlParams = new URLSearchParams(
-          window.location.hash.substring(1)
-        );
-        const error = urlParams.get("error");
+        // Handle login form submission
+        document
+          .getElementById("loginForm")
+          .addEventListener("submit", function (e) {
+            e.preventDefault();
 
-        if (error) {
-          showErrorMessage("Login gagal, silakan coba lagi.");
-        }
+            const password = document.getElementById("password").value.trim();
+            const errorMessage = document.getElementById("errorMessage");
 
-        // Function to show error message
-        function showErrorMessage(message) {
-          const container = document.querySelector(".glass-effect");
-
-          const errorDiv = document.createElement("div");
-          errorDiv.className =
-            "bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mt-6";
-          errorDiv.innerHTML = `<p>${message}</p>`;
-
-          container.appendChild(errorDiv);
-        }
+            if (password === "thegambler") {
+              // Save login status to localStorage
+              localStorage.setItem("login_key", "thegambler");
+              // Redirect to frontend-crush
+              window.location.href = "http://localhost:3002/index.html";
+            } else if (password === "youbelongwithme") {
+              // Save login status to localStorage
+              localStorage.setItem("login_key", "youbelongwithme");
+              // Redirect to frontend-yours
+              window.location.href = "http://localhost:3001/index.html";
+            } else {
+              // Show error message
+              errorMessage.textContent =
+                "Kata kunci tidak valid. Silakan coba lagi.";
+              errorMessage.classList.remove("hidden");
+            }
+          });
       });
 
       function toggleTheme() {

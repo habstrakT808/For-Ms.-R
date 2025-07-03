@@ -102,6 +102,11 @@ class SpotifyPlayer {
     const listeningActivityContainer =
       document.getElementById("listening-activity");
 
+    // Also update the main music player if configured to sync with Spotify
+    const syncWithSpotify =
+      localStorage.getItem("sync_spotify_playback") === "true" || true; // Default to true
+    const musicPlayerContainer = document.getElementById("music-player");
+
     if (!listeningActivityContainer) {
       console.log("Listening activity container not found");
       return;
@@ -169,6 +174,132 @@ class SpotifyPlayer {
         </div>
       </div>
     `;
+
+    // If sync with Spotify is enabled, also update the main music player
+    if (syncWithSpotify && musicPlayerContainer) {
+      // Update current song display with the playing Spotify track
+      const songCoverElement = document.getElementById("song-cover");
+      const songTitleElement = document.getElementById("song-title");
+      const songArtistElement = document.getElementById("song-artist");
+      const albumTitleElement = document.getElementById("album-title");
+
+      if (songCoverElement) {
+        songCoverElement.src = data.track.albumArt;
+      }
+
+      if (songTitleElement) {
+        songTitleElement.textContent = data.track.name;
+      }
+
+      if (songArtistElement) {
+        songArtistElement.textContent = data.track.artist;
+      }
+
+      if (albumTitleElement) {
+        albumTitleElement.textContent = data.track.album || "";
+      }
+
+      // Update progress bar and playback state
+      const progressBar = document.getElementById("progress-bar");
+      if (progressBar) {
+        progressBar.style.width = `${progressPercentage}%`;
+      }
+
+      // Also update the server with the current song to make it the "comfort song"
+      this.syncCurrentSongWithServer(data.track);
+    }
+  }
+
+  // Sync currently playing Spotify track with server as comfort song
+  async syncCurrentSongWithServer(track) {
+    try {
+      // Only sync if we haven't synced this song already recently
+      const lastSyncedSongId = localStorage.getItem("last_synced_song_id");
+      const lastSyncTime = parseInt(
+        localStorage.getItem("last_sync_time") || "0"
+      );
+      const now = Date.now();
+
+      // Only update if song changed or if last sync was more than 1 minute ago
+      if (lastSyncedSongId !== track.id || now - lastSyncTime > 60000) {
+        console.log(
+          `🎵 Syncing currently playing song with server: ${track.name}`
+        );
+
+        const songData = {
+          spotifyId: track.id,
+          songName: track.name,
+          artist: track.artist,
+          album: track.album,
+          albumArt: track.albumArt,
+          previewUrl: track.previewUrl,
+          spotifyUrl: track.spotifyUrl,
+          selectedBy: "yours", // Or determine from current user
+          duration: track.duration_ms,
+        };
+
+        const response = await fetch(
+          "http://localhost:3000/api/current-song/spotify",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(songData),
+          }
+        );
+
+        if (response.ok) {
+          console.log("✅ Successfully synced Spotify song with server");
+          localStorage.setItem("last_synced_song_id", track.id);
+          localStorage.setItem("last_sync_time", now.toString());
+
+          // Update the main music player UI
+          this.updateMusicPlayerFromCurrentSong();
+        }
+      }
+    } catch (error) {
+      console.error("❌ Error syncing Spotify song with server:", error);
+    }
+  }
+
+  // Fetch and update the main music player with current comfort song
+  async updateMusicPlayerFromCurrentSong() {
+    try {
+      const response = await fetch("http://localhost:3000/api/current-song");
+      if (!response.ok) {
+        throw new Error("Failed to fetch current song");
+      }
+
+      const currentSong = await response.json();
+      if (!currentSong) return;
+
+      // Update UI elements in the main player
+      const songCoverElement = document.getElementById("song-cover");
+      const songTitleElement = document.getElementById("song-title");
+      const songArtistElement = document.getElementById("song-artist");
+      const albumTitleElement = document.getElementById("album-title");
+
+      if (songCoverElement && currentSong.albumArt) {
+        songCoverElement.src = currentSong.albumArt;
+      }
+
+      if (songTitleElement) {
+        songTitleElement.textContent = currentSong.songName;
+      }
+
+      if (songArtistElement) {
+        songArtistElement.textContent = currentSong.artist;
+      }
+
+      if (albumTitleElement && currentSong.album) {
+        albumTitleElement.textContent = currentSong.album;
+      }
+
+      console.log(`✅ Music player updated with: ${currentSong.songName}`);
+    } catch (error) {
+      console.error("❌ Error updating music player:", error);
+    }
   }
 
   // Show login prompt in listening activity section

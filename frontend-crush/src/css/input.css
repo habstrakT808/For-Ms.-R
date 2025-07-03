@@ -178,19 +178,43 @@ textarea:focus {
   padding: 1rem;
 }
 
+/* Scrollbar styling for letters container */
+#letters-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+#letters-container::-webkit-scrollbar-track {
+  background: theme("colors.cream.100");
+  border-radius: 8px;
+}
+
+#letters-container::-webkit-scrollbar-thumb {
+  background: theme("colors.cream.400");
+  border-radius: 8px;
+}
+
+#letters-container::-webkit-scrollbar-thumb:hover {
+  background: theme("colors.warm.400");
+}
+
+/* Dark mode scrollbar */
+.dark #letters-container::-webkit-scrollbar-track {
+  background: theme("colors.cream.800");
+}
+
+.dark #letters-container::-webkit-scrollbar-thumb {
+  background: theme("colors.cream.600");
+}
+
+.dark #letters-container::-webkit-scrollbar-thumb:hover {
+  background: theme("colors.warm.500");
+}
+
 /* Track Card Improvements */
 .track-card {
-  transition: all 0.2s ease;
-  border: 1px solid #f3f4f6;
   margin-bottom: 0.75rem;
   padding: 1rem;
   border-radius: 0.75rem;
-}
-
-.track-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  border-color: #d4a574;
 }
 
 /* Button Improvements */
@@ -476,15 +500,6 @@ textarea:focus {
   background: rgba(80, 80, 80, 0.8);
 }
 
-/* Dark mode scrollbar */
-[data-theme="dark"] .modal-body::-webkit-scrollbar-track {
-  background: #404040;
-}
-
-[data-theme="dark"] .modal-body::-webkit-scrollbar-thumb {
-  background: #f4a855;
-}
-
 /* Dark mode animations */
 [data-theme="dark"] .animate-twinkle {
   filter: brightness(1.2);
@@ -546,4 +561,36 @@ textarea:focus {
     font-size: 1rem;
     line-height: 1.6;
   }
+}
+
+/* Scrollbar styling for queue container */
+#queue-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+#queue-container::-webkit-scrollbar-track {
+  background: theme("colors.cream.100");
+  border-radius: 8px;
+}
+
+#queue-container::-webkit-scrollbar-thumb {
+  background: theme("colors.cream.400");
+  border-radius: 8px;
+}
+
+#queue-container::-webkit-scrollbar-thumb:hover {
+  background: theme("colors.warm.400");
+}
+
+/* Dark mode scrollbar for queue */
+.dark #queue-container::-webkit-scrollbar-track {
+  background: theme("colors.cream.800");
+}
+
+.dark #queue-container::-webkit-scrollbar-thumb {
+  background: theme("colors.cream.600");
+}
+
+.dark #queue-container::-webkit-scrollbar-thumb:hover {
+  background: theme("colors.warm.500");
 }

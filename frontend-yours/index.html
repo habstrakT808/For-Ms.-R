@@ -105,6 +105,16 @@
             >
               <span id="theme-icon" class="text-lg">🌙</span>
             </button>
+
+            <!-- Logout Button -->
+            <button
+              id="logout-btn"
+              class="px-4 py-2 bg-warm-500 hover:bg-warm-600 text-white rounded-lg flex items-center justify-center font-medium transition-all duration-200 hover:scale-105"
+              title="Logout"
+              onclick="logout()"
+            >
+              Logout
+            </button>
           </div>
 
           <!-- Mobile Menu Button -->
@@ -160,6 +170,14 @@
               class="text-cream-700 dark:text-cream-300 hover:text-warm-600 dark:hover:text-warm-400 transition-colors py-2"
               >Messages</a
             >
+
+            <!-- Logout Button for Mobile -->
+            <button
+              onclick="logout()"
+              class="mt-4 w-full text-left text-cream-700 dark:text-cream-300 hover:text-warm-600 dark:hover:text-warm-400 transition-colors py-2 flex items-center"
+            >
+              Logout
+            </button>
           </div>
         </div>
       </div>
@@ -451,6 +469,7 @@
                         id="play-pause-btn"
                         onclick="togglePlayback()"
                         class="w-14 h-14 bg-gradient-to-r from-warm-400 to-cream-500 hover:from-warm-500 hover:to-cream-600 rounded-full flex items-center justify-center text-white shadow-lg transition-all duration-200 hover:scale-105"
+                        title="Open in Spotify"
                       >
                         <span id="play-pause-icon" class="text-lg">▶</span>
                       </button>
@@ -476,15 +495,6 @@
                           class="w-20 h-2 bg-cream-200 rounded-lg appearance-none cursor-pointer"
                         />
                       </div>
-
-                      <!-- Spotify Link -->
-                      <button
-                        onclick="openSpotify()"
-                        class="w-10 h-10 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center text-white shadow-lg transition-all duration-200 hover:scale-105"
-                        title="Open in Spotify"
-                      >
-                        <span class="text-sm">🎵</span>
-                      </button>
 
                       <!-- Choose New Song -->
                       <button
@@ -548,7 +558,10 @@
           </div>
 
           <!-- Queue List -->
-          <div id="queue-container" class="space-y-3">
+          <div
+            id="queue-container"
+            class="space-y-3 max-h-[24rem] overflow-y-auto scrollbar-thin scrollbar-thumb-cream-400 scrollbar-track-cream-100 dark:scrollbar-thumb-cream-600 dark:scrollbar-track-cream-800 pr-2"
+          >
             <div id="queue-empty" class="text-center py-8">
               <div class="text-4xl mb-4">🎶</div>
               <h4
@@ -644,7 +657,10 @@
 
           <!-- Letters Display - REAL-TIME -->
           <div class="max-w-4xl mx-auto">
-            <div id="letters-container" class="space-y-6">
+            <div
+              id="letters-container"
+              class="space-y-6 max-h-[32rem] overflow-y-auto scrollbar-thin scrollbar-thumb-cream-400 scrollbar-track-cream-100 dark:scrollbar-thumb-cream-600 dark:scrollbar-track-cream-800 pr-2"
+            >
               <!-- Loading State -->
               <div id="letters-loading" class="text-center py-12">
                 <div

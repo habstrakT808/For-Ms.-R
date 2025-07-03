@@ -63,7 +63,23 @@ async function checkLoginStatus() {
     window.location.pathname === "/" ||
     window.location.pathname.endsWith("/")
   ) {
-    console.log("Already on index page, skipping login check");
+    // Check for login key in localStorage
+    const loginKey = localStorage.getItem("login_key");
+
+    if (!loginKey) {
+      console.log("No login key found, redirecting to login page");
+      window.location.href = "login.html";
+      return false;
+    }
+
+    if (loginKey !== "youbelongwithme" && loginKey !== "thegambler") {
+      console.log("Invalid login key, redirecting to login page");
+      localStorage.removeItem("login_key");
+      window.location.href = "login.html";
+      return false;
+    }
+
+    console.log("Valid login key found, continuing");
     return true;
   }
 
@@ -73,38 +89,23 @@ async function checkLoginStatus() {
     return true;
   }
 
-  // Check for auth data in localStorage
-  const authData = JSON.parse(
-    localStorage.getItem("spotify_auth_data") || "null"
-  );
+  // Check for login key in localStorage
+  const loginKey = localStorage.getItem("login_key");
 
-  if (!authData) {
-    console.log("No authentication data found");
+  if (!loginKey) {
+    console.log("No login key found, redirecting to login page");
+    window.location.href = "login.html";
     return false;
   }
 
-  // Check if token is expired
-  if (authData.tokenExpiry < Date.now()) {
-    console.log("Token expired, attempting to refresh");
-
-    try {
-      // Try to refresh the token
-      const refreshed = await refreshSpotifyToken(authData.refreshToken);
-      if (!refreshed) {
-        return false;
-      }
-      return true;
-    } catch (error) {
-      console.error("Failed to refresh token:", error);
-      return false;
-    }
+  if (loginKey !== "youbelongwithme" && loginKey !== "thegambler") {
+    console.log("Invalid login key, redirecting to login page");
+    localStorage.removeItem("login_key");
+    window.location.href = "login.html";
+    return false;
   }
 
-  // Set the user info in the UI
-  if (authData.user && authData.user.name) {
-    setUserInfo(authData.user);
-  }
-
+  console.log("Valid login key found, continuing");
   return true;
 }
 
@@ -179,8 +180,12 @@ function setUserInfo(user) {
 // Logout function
 function logout() {
   localStorage.removeItem("spotify_auth_data");
+  localStorage.removeItem("login_key");
   window.location.href = "login.html";
 }
+
+// Make logout function available globally
+window.logout = logout;
 
 // Initialize application
 function initializeApp() {
@@ -201,8 +206,18 @@ function initializeApp() {
   loadInitialData(apiBaseUrl);
   loadQueue(apiBaseUrl);
 
+  // Initialize Spotify player if API is available
+  const spotifyPlayer = new SpotifyPlayer();
+
   setTimeout(() => {
     initializeSpotify(apiBaseUrl);
+
+    // Initialize Spotify features more directly
+    spotifyPlayer.initializeSpotifySDK();
+    spotifyPlayer.initializeListeningActivity();
+
+    // Make sure the music player is in sync with what's playing in Spotify
+    spotifyPlayer.updateMusicPlayerFromCurrentSong();
   }, 1000);
 
   // Add event listener to stop polling when user leaves the page
@@ -278,7 +293,15 @@ function displayQueue() {
     return;
   }
 
-  queueContainer.innerHTML = musicQueue
+  // Sort queue by recently added (if timestamp exists)
+  const sortedQueue = [...musicQueue].sort((a, b) => {
+    if (a.addedAt && b.addedAt) {
+      return new Date(b.addedAt) - new Date(a.addedAt);
+    }
+    return 0;
+  });
+
+  queueContainer.innerHTML = sortedQueue
     .map(
       (song, index) => `
       <div class="queue-item bg-white/70 dark:bg-cream-800/70 rounded-lg p-3 mb-2 flex items-center space-x-3 hover:bg-white/90 dark:hover:bg-cream-700/90 transition-all duration-200">
@@ -299,7 +322,7 @@ function displayQueue() {
         </div>
         <div class="flex items-center space-x-1 flex-shrink-0">
           <button 
-            onclick="removeFromQueue(${index})" 
+            onclick="removeFromQueue(${sortedQueue.indexOf(song)})" 
             class="w-6 h-6 rounded-full bg-red-100 hover:bg-red-200 text-red-500 flex items-center justify-center text-xs"
             title="Remove from queue"
           >
@@ -661,7 +684,13 @@ function displayMessages(messages) {
     return;
   }
 
-  messages.reverse().forEach((message, index) => {
+  // Sort messages by timestamp (newest first)
+  const sortedMessages = [...messages].sort(
+    (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+  );
+
+  // Display all messages, container will handle scrolling
+  sortedMessages.forEach((message, index) => {
     displayNewMessage(message, false, index * 100);
   });
 }
@@ -1125,18 +1154,10 @@ function showNotification(message, type = "success") {
   }, 5000);
 }
 
-window.openSpotify = function () {
-  if (window.currentSong?.spotifyUrl) {
-    window.open(window.currentSong.spotifyUrl, "_blank");
-  } else {
-    showNotification("Spotify link not available", "error");
-  }
-};
-
 // ===== DARK MODE FUNCTIONALITY =====
 
 function initializeDarkMode() {
-  const savedTheme = localStorage.getItem("theme") || "light";
+  const savedTheme = localStorage.getItem("theme") || "dark";
 
   setTheme(savedTheme);
 
@@ -1264,6 +1285,54 @@ function initializeUI() {
         currentAudio.volume = this.value / 100;
       }
     });
+
+  // Spotify sync toggle
+  const syncSpotifyToggle = document.getElementById("sync-spotify-toggle");
+  if (syncSpotifyToggle) {
+    // Set initial state based on localStorage
+    const syncEnabled =
+      localStorage.getItem("sync_spotify_playback") === "true" || true;
+    updateSyncButtonState(syncSpotifyToggle, syncEnabled);
+
+    syncSpotifyToggle.addEventListener("click", () => {
+      const currentState =
+        localStorage.getItem("sync_spotify_playback") === "true" || true;
+      const newState = !currentState;
+
+      // Update localStorage
+      localStorage.setItem("sync_spotify_playback", newState.toString());
+
+      // Update button appearance
+      updateSyncButtonState(syncSpotifyToggle, newState);
+
+      // If enabling sync, immediately try to update with current song
+      if (newState && spotifyPlayer) {
+        spotifyPlayer.updateMusicPlayerFromCurrentSong();
+      }
+
+      // Show feedback toast
+      showToast(
+        newState
+          ? "Spotify sync enabled! Music player will update with your listening activity."
+          : "Spotify sync disabled."
+      );
+    });
+  }
+}
+
+// Update sync button state (visual feedback)
+function updateSyncButtonState(button, isEnabled) {
+  if (!button) return;
+
+  if (isEnabled) {
+    button.classList.remove("bg-gray-600", "hover:bg-gray-700");
+    button.classList.add("bg-green-600", "hover:bg-green-700");
+    button.innerHTML = '<i class="fab fa-spotify mr-1"></i> Sync On';
+  } else {
+    button.classList.remove("bg-green-600", "hover:bg-green-700");
+    button.classList.add("bg-gray-600", "hover:bg-gray-700");
+    button.innerHTML = '<i class="fab fa-spotify mr-1"></i> Sync Off';
+  }
 }
 
 // ===== CONSOLE WELCOME =====
@@ -1463,23 +1532,30 @@ function setupAudioPlayer(previewUrl) {
 
 // Toggle audio playback
 window.togglePlayback = function () {
-  if (!currentAudio) return;
-
-  const playButton = document.getElementById("play-button");
-
-  if (isPlaying) {
-    currentAudio.pause();
-    if (playButton) {
-      playButton.innerHTML = '<span class="text-lg">▶</span>';
-    }
-  } else {
-    currentAudio.play();
-    if (playButton) {
-      playButton.innerHTML = '<span class="text-lg">⏸</span>';
-    }
+  if (!currentSong || !currentSong.spotifyUrl) {
+    showNotification("No song available to play in Spotify", "error");
+    return;
   }
 
-  isPlaying = !isPlaying;
+  const playPauseBtn = document.getElementById("play-pause-btn");
+  const playPauseIcon = document.getElementById("play-pause-icon");
+  const musicStatusText = document.getElementById("music-status-text");
+
+  // Update UI to show we're opening Spotify
+  if (playPauseIcon) playPauseIcon.textContent = "🎵";
+  if (musicStatusText) musicStatusText.textContent = "Opening in Spotify...";
+
+  // Open song in Spotify
+  window.open(currentSong.spotifyUrl, "_blank");
+
+  showNotification("Opening song in Spotify", "info");
+
+  // Reset UI after a moment
+  setTimeout(() => {
+    if (playPauseIcon) playPauseIcon.textContent = "▶";
+    if (musicStatusText)
+      musicStatusText.textContent = "Ready to play in Spotify";
+  }, 3000);
 };
 
 // Add a track to the queue
@@ -1541,13 +1617,15 @@ window.clearQueue = async function () {
 
     console.log("🎵 Clearing queue");
 
-    const response = await fetch(`${apiBaseUrl}/api/queue/clear`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ clearedBy: currentUser }),
-    });
+    const response = await fetch(
+      `${apiBaseUrl}/api/queue?userId=${currentUser}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to clear queue: ${response.status}`);
@@ -1575,11 +1653,11 @@ window.shuffleQueue = async function () {
     console.log("🎵 Shuffling queue");
 
     const response = await fetch(`${apiBaseUrl}/api/queue/shuffle`, {
-      method: "POST",
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ shuffledBy: currentUser }),
+      body: JSON.stringify({ userId: currentUser }),
     });
 
     if (!response.ok) {

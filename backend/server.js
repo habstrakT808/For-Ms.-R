@@ -972,7 +972,7 @@ app.get("/login", (req, res) => {
 
   // Gunakan URI yang sesuai untuk callback umum
   const redirectUri =
-    process.env.SPOTIFY_REDIRECT_URI || "http://127.0.0.1:3000/callback";
+    process.env.SPOTIFY_REDIRECT_URI || "http://localhost:3000/callback";
 
   console.log(`🔗 Login requested for ${userType} (port: ${frontendPort})`);
   console.log(`🔄 Using redirect URI: ${redirectUri}`);
@@ -1012,13 +1012,13 @@ app.get("/callback", async (req, res) => {
 
   if (state === null || !code) {
     console.log(`❌ Missing code or state for ${userId}`);
-    res.redirect(`http://127.0.0.1:${frontendPort}/#error=state_mismatch`);
+    res.redirect(`http://localhost:${frontendPort}/#error=state_mismatch`);
     return;
   }
 
   // PENTING: Gunakan redirect URI yang sama dengan yang digunakan untuk autentikasi
   const redirectUri =
-    process.env.SPOTIFY_REDIRECT_URI || "http://127.0.0.1:3000/callback";
+    process.env.SPOTIFY_REDIRECT_URI || "http://localhost:3000/callback";
 
   console.log(`🔄 Using redirect URI for token exchange: ${redirectUri}`);
 
@@ -1080,7 +1080,7 @@ app.get("/callback", async (req, res) => {
 
     // Redirect ke frontend yang sesuai dengan port yang benar
     const redirectUrl =
-      `http://127.0.0.1:${frontendPort}/auth-success.html?` +
+      `http://localhost:${frontendPort}/auth-success.html?` +
       querystring.stringify({
         access_token,
         refresh_token,
@@ -1106,7 +1106,7 @@ app.get("/callback", async (req, res) => {
 
     // Coba cara alternatif: redirect langsung ke frontend dengan kode
     const alternativeRedirectUrl =
-      `http://127.0.0.1:${frontendPort}/auth-success.html?` +
+      `http://localhost:${frontendPort}/auth-success.html?` +
       querystring.stringify({
         code: code,
         state: state,
@@ -1137,7 +1137,7 @@ app.post("/api/spotify/exchange-token", async (req, res) => {
       url: "https://accounts.spotify.com/api/token",
       data: querystring.stringify({
         code: code,
-        redirect_uri: redirect_uri || "http://127.0.0.1:3000/callback",
+        redirect_uri: redirect_uri || "http://localhost:3000/callback",
         grant_type: "authorization_code",
       }),
       headers: {
@@ -1238,57 +1238,60 @@ app.get("/api/user-profile", async (req, res) => {
 
 // Get currently playing track from Spotify
 app.get("/api/spotify/currently-playing", async (req, res) => {
-  const { access_token } = req.query;
-
-  if (!access_token) {
-    return res.status(401).json({ error: "Access token is required" });
-  }
-
   try {
-    const response = await axios({
-      method: "get",
-      url: "https://api.spotify.com/v1/me/player/currently-playing",
-      headers: {
-        Authorization: "Bearer " + access_token,
-      },
-    });
+    const { access_token } = req.query;
 
-    // If no track is playing (204 No Content)
-    if (response.status === 204) {
-      return res.json({ isPlaying: false });
+    if (!access_token) {
+      return res.status(400).json({ error: "Access token is required" });
     }
 
-    // If track is playing
-    const track = response.data.item;
-
-    // Format the response
-    const formattedResponse = {
-      isPlaying: response.data.is_playing,
-      progress_ms: response.data.progress_ms,
-      track: {
-        id: track.id,
-        name: track.name,
-        artist: track.artists.map((artist) => artist.name).join(", "),
-        album: track.album.name,
-        albumArt: track.album.images[0]?.url || null,
-        duration_ms: track.duration_ms,
-        spotifyUrl: track.external_urls.spotify,
-      },
-    };
-
-    res.json(formattedResponse);
-  } catch (error) {
-    console.error(
-      "Error fetching currently playing track:",
-      error.response?.data || error.message
+    // Call Spotify API to get currently playing track
+    const response = await axios.get(
+      "https://api.spotify.com/v1/me/player/currently-playing",
+      {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      }
     );
 
-    // If error is 401 Unauthorized, token might be expired
-    if (error.response?.status === 401) {
-      return res.status(401).json({ error: "Spotify token expired" });
+    // If no track is playing
+    if (response.status === 204) {
+      return res.json({ isPlaying: false, track: null });
     }
 
-    res.status(500).json({ error: "Failed to fetch currently playing track" });
+    // Format track info
+    const trackData = response.data;
+    const track = {
+      id: trackData.item.id,
+      name: trackData.item.name,
+      artist: trackData.item.artists[0].name,
+      album: trackData.item.album.name,
+      albumArt: trackData.item.album.images[0]?.url || null,
+      previewUrl: trackData.item.preview_url,
+      spotifyUrl: trackData.item.external_urls.spotify,
+      duration_ms: trackData.item.duration_ms,
+    };
+
+    // Return track info and playback state
+    res.json({
+      isPlaying: trackData.is_playing,
+      progress_ms: trackData.progress_ms,
+      track,
+    });
+  } catch (error) {
+    console.error("Error fetching currently playing track:", error.message);
+
+    // Handle 401 Unauthorized (token expired)
+    if (error.response && error.response.status === 401) {
+      return res.status(401).json({ error: "Token expired" });
+    }
+
+    // Handle other errors
+    res.status(500).json({
+      error: "Failed to fetch currently playing track",
+      details: error.response?.data || error.message,
+    });
   }
 });
 
